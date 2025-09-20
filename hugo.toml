@@ -9,14 +9,12 @@ pluralizelisttitles = false # removes the automatically appended "s" on sidebar 
 # disqusShortname = "yourDisqusShortname"
 [params]
 brand = "Cromemadnd Lancity" # name of your site - appears in the sidebar
+hidetoc = false # optional - defaults to false
 # remote_brand_image = 'https://github.com/Cromemadnd.png' # path to a remote file
 brand_image = "/images/avatar.jpg" # path to the image shown in the sidebar
-description = "The quick brown fox jumps over the <a href='javascript:alert(\"XD\");'>lazy dog</a>" # Used as default meta description if not specified in front matter
+description = "The quick brown fox jumps over the <a href='javascript:rollAvatar();'>lazy dog</a>" # Used as default meta description if not specified in front matter
 dark_mode = true # optional - defaults to false
-# favicon = "favicon.png"             # path to favicon (defaults to favicon.png)
-front_page_content = [
-    "posts"
-] # Equivalent to the default value, add page bundle names to include them on the front page.
+favicon = "favicon.png" # path to favicon (defaults to favicon.png)
 # MENU PLACEHOLDER
 # Menu dict keys:
 # Name:         The name to display on the menu.
@@ -24,8 +22,10 @@ front_page_content = [
 # HasChildren:  If the directory's files should be listed.  Default is true.
 # Limit:        If the files should be listed, how many should be shown.
 menu = [
+    { Name = "Projects", URL = "/projects/", HasChildren = true, Limit = 5 },
+    { Name = "Diary", URL = "/diary/", HasChildren = true, Limit = 5 },
+    { Name = "Gallery", URL = "/gallery/", HasChildren = true, Limit = 5 },
     { Name = "About", URL = "/about/", HasChildren = false },
-    { Name = "Posts", URL = "/posts/", Pre = "Recent", HasChildren = true, Limit = 5 },
 ]
 # Links to your socials.  Comment or delete any you don't need/use.
 # discord_url = "https://discord.com"
@@ -52,7 +52,7 @@ ncm_url = "https://music.163.com/#/user/home?id=1393412234"
 # Adds an RSS icon to the end of the socials which links to {{ .Site.BaseURL }}/index.xml
 rss_icon = true
 # Which section the RSS icon links to, defaults to all content. See https://gohugo.io/templates/rss/#section-rss
-rss_section = "posts"
+# rss_section = "posts"
 # Hex colors for your sidebar.
 moon_sun_background_color = "#515151" # default is #515151
 moon_sun_color = "#FFF" # default is #FFF

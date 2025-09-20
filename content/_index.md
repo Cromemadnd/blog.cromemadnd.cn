@@ -1,7 +1,10 @@
 +++
 date = '2025-09-20T23:27:51+08:00'
-draft = true
+draft = false
 title = 'Hello'
+layout = 'single'
 +++
 
-一段自我介绍
+首页
+
+Navigation Page
