@@ -23,6 +23,7 @@ favicon = "favicon.png" # path to favicon (defaults to favicon.png)
 # Limit:        If the files should be listed, how many should be shown.
 menu = [
     { Name = "Projects", URL = "/projects/", HasChildren = true, Limit = 5 },
+    { Name = "Posts", URL = "/posts/", HasChildren = true, Limit = 5 },
     { Name = "Diary", URL = "/diary/", HasChildren = true, Limit = 5 },
     { Name = "Gallery", URL = "/gallery/", HasChildren = true, Limit = 5 },
     { Name = "About", URL = "/about/", HasChildren = false },
