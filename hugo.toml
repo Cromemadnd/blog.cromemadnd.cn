@@ -4,6 +4,7 @@ theme = "poison"
 title = "Cromemadnd Lancity"
 # pagination.pagerSize = 10
 pluralizelisttitles = false # removes the automatically appended "s" on sidebar entries
+ignoreLogs = ['warning-goldmark-raw-html']
 
 # NOTE: If using Disqus as commenting engine, uncomment and configure this line
 # disqusShortname = "yourDisqusShortname"
@@ -23,9 +24,9 @@ favicon = "favicon.png" # path to favicon (defaults to favicon.png)
 # Limit:        If the files should be listed, how many should be shown.
 menu = [
     { Name = "Projects", URL = "/projects/", HasChildren = true, Limit = 5 },
-    { Name = "Posts", URL = "/posts/", HasChildren = true, Limit = 5 },
-    { Name = "Diary", URL = "/diary/", HasChildren = true, Limit = 5 },
-    { Name = "Gallery", URL = "/gallery/", HasChildren = true, Limit = 5 },
+    { Name = "Posts", URL = "/posts/", HasChildren = true, Limit = 3 },
+    { Name = "Diary", URL = "/diary/", HasChildren = true, Limit = 2 },
+    { Name = "Gallery", URL = "/gallery/", HasChildren = true, Limit = 2 },
     { Name = "About", URL = "/about/", HasChildren = false },
 ]
 # Links to your socials.  Comment or delete any you don't need/use.
