@@ -104,3 +104,9 @@ text_color_dark = "#EEE" # default is #EEE
 [taxonomies]
 series = 'series'
 tags = 'tags'
+
+[markup]
+[markup.goldmark]
+[markup.goldmark.renderer]
+# 设为 true 后，Markdown 文件中的原生 HTML 标签就会被渲染出来
+unsafe = true 
