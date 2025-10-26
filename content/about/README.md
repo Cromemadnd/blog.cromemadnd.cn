@@ -15,7 +15,7 @@ layout = 'single'
 
 ## 简短的自我介绍
 
-这个窝属于康明德(aka Cromemadnd Lancity)
+这个窝属于康明德(aka `Cromemadnd Lancity`)
 
 出厂时间戳为`0x44297298`，也许会符合♈ / **INFP**人群的刻板印象
 
