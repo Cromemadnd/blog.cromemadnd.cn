@@ -201,17 +201,17 @@ plugins:
     options:
       provider: giscus
       options:
-        repo: TODO:username/repo-name
-        repoId: TODO:your-repo-id
+        repo: Cromemadnd/blog.cromemadnd.cn
+        repoId: R_kgDOSqVEGQ
         category: Announcements
-        categoryId: TODO:your-category-id
+        categoryId: DIC_kwDOSqVEGc4C-A8q
         mapping: url
         strict: true
         reactionsEnabled: true
         inputPosition: bottom
         lightTheme: light
         darkTheme: dark
-        lang: en
+        lang: zh
     layout:
       position: afterBody
       priority: 10
