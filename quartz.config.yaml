@@ -6,7 +6,7 @@ configuration:
   enablePopovers: true
   analytics:
     provider: plausible
-  locale: en-US
+  locale: zh-CN
   baseUrl: blog.cromemadnd.cn
   ignorePatterns:
     - private
@@ -213,6 +213,7 @@ plugins:
         strict: true
         reactionsEnabled: true
         inputPosition: bottom
+        themeUrl: https://giscus.app/themes
         lightTheme: light
         darkTheme: dark
         lang: zh

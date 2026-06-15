@@ -1,5 +1,6 @@
 import { PageFrame, PageFrameProps } from "./types"
 import HeaderConstructor from "../Header"
+import { joinSegments, pathToRoot } from "../../util/path"
 
 const Header = HeaderConstructor()
 
@@ -45,6 +46,11 @@ export const DefaultFrame: PageFrame = {
   }: PageFrameProps) {
     const tags = componentData.fileData.frontmatter?.tags
     const tagText = Array.isArray(tags) ? tags.join("  ") : undefined
+    const baseDir =
+      componentData.fileData.slug === "404" ? "/" : pathToRoot(componentData.fileData.slug!)
+    const iconPath = joinSegments(baseDir, "static/favicon.jpg")
+    const toolbar = beforeBody.filter((BodyComponent) => BodyComponent.displayName === "Flex")
+    const headerContent = beforeBody.filter((BodyComponent) => BodyComponent.displayName !== "Flex")
 
     return (
       <>
@@ -52,19 +58,24 @@ export const DefaultFrame: PageFrame = {
           {left.map((BodyComponent) => (
             <BodyComponent {...componentData} />
           ))}
+          <Footer {...componentData} />
         </div>
         <div class="center">
           <div class="page-header" data-tags={tagText}>
+            <a class="site-brand" href={baseDir} aria-label={componentData.cfg.pageTitle}>
+              <img src={iconPath} alt="" aria-hidden="true" />
+              <span>{componentData.cfg.pageTitle}</span>
+            </a>
             <Header {...componentData}>
               {header.map((HeaderComponent) => (
                 <HeaderComponent {...componentData} />
               ))}
             </Header>
             <div class="popover-hint">
-              {beforeBody.map((BodyComponent) => (
+              {headerContent.map((BodyComponent) => (
                 <BodyComponent {...componentData} />
               ))}
-              <button
+              {/* <button
                 type="button"
                 class="sidebar-toggle"
                 aria-label="Toggle sidebar"
@@ -87,7 +98,7 @@ export const DefaultFrame: PageFrame = {
                   <path d="M9 3v18" />
                   <path d="m14 9 3 3-3 3" />
                 </svg>
-              </button>
+              </button> */}
             </div>
           </div>
           <Content {...componentData} />
@@ -99,11 +110,15 @@ export const DefaultFrame: PageFrame = {
           </div>
         </div>
         <div class="right sidebar">
+          <div class="sidebar-toolbar">
+            {toolbar.map((BodyComponent) => (
+              <BodyComponent {...componentData} />
+            ))}
+          </div>
           {right.map((BodyComponent) => (
             <BodyComponent {...componentData} />
           ))}
         </div>
-        <Footer {...componentData} />
         <script dangerouslySetInnerHTML={{ __html: sidebarToggleScript }} />
       </>
     )
