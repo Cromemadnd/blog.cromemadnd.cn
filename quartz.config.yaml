@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./quartz/plugins/quartz-plugins.schema.json
 configuration:
-  pageTitle: Quartz 5
+  pageTitle: Cromemadnd's Blog
   pageTitleSuffix: ""
   enableSPA: true
   enablePopovers: true
@@ -72,7 +72,8 @@ plugins:
     order: 50
     layout:
       position: right
-      priority: 30
+      priority: 10
+      display: desktop-only
   - source: github:quartz-community/crawl-links
     enabled: true
     options:
@@ -144,11 +145,12 @@ plugins:
     enabled: true
     layout:
       position: right
-      priority: 10
+      priority: 30
+      display: desktop-only
   - source: github:quartz-community/search
     enabled: true
     layout:
-      position: left
+      position: beforeBody
       priority: 20
       group: toolbar
       groupOptions:
@@ -158,11 +160,13 @@ plugins:
     layout:
       position: right
       priority: 50
+      display: desktop-only
   - source: github:quartz-community/article-title
     enabled: true
     layout:
       position: beforeBody
       priority: 10
+      condition: not-index
   - source: github:quartz-community/content-meta
     enabled: true
     layout:
@@ -172,7 +176,7 @@ plugins:
     enabled: false
     layout:
       position: beforeBody
-      priority: 30
+      priority: 18
   - source: github:quartz-community/page-title
     enabled: true
     layout:
@@ -181,17 +185,17 @@ plugins:
   - source: github:quartz-community/darkmode
     enabled: true
     layout:
-      position: left
+      position: beforeBody
       priority: 30
       group: toolbar
   - source: github:quartz-community/reader-mode
-    enabled: true
+    enabled: false
     layout:
-      position: left
+      position: beforeBody
       priority: 35
       group: toolbar
   - source: github:quartz-community/breadcrumbs
-    enabled: true
+    enabled: false
     layout:
       position: beforeBody
       priority: 5
@@ -222,7 +226,7 @@ plugins:
         GitHub: https://github.com/jackyzha0/quartz
         Discord Community: https://discord.gg/cRFFHYye7t
   - source: github:quartz-community/recent-notes
-    enabled: true
+    enabled: false
     options:
       title: Recent Notes
       limit: 5
@@ -252,7 +256,7 @@ plugins:
         - tags
         - aliases
       excludedProperties: []
-      hidePropertiesView: false
+      hidePropertiesView: true
       delimiters: ---
       language: yaml
     order: 5

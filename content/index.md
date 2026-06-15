@@ -1,6 +1,8 @@
 ---
-title: Welcome to Quartz
+title: Cromemadnd's Blog
 ---
 
-This is a blank Quartz installation.
-See the [documentation](https://quartz.jzhao.xyz) for how to get started.
+## Recent Notes
+
+- [Hello](./test)  
+  Jun 15, 2026
