@@ -31,27 +31,23 @@ const sidebarToggleScript = `
     }
   }
 
-  const bindSidebarToggle = () => {
-    document.querySelectorAll(".sidebar-toggle").forEach((button) => {
-      if (button.dataset.bound === "true") return
-      button.dataset.bound = "true"
-      button.addEventListener("click", () => {
-        const root = document.getElementById("quartz-root")
-        const side = button.dataset.sidebar || "left"
-        const collapsedClass = side + "-sidebar-collapsed"
-        const collapsed = !root?.classList.contains(collapsedClass)
-        root?.classList.toggle(collapsedClass, collapsed)
-        syncAllSidebarToggles()
-      })
-    })
+  const handleToggleClick = (event) => {
+    const button = event.target.closest(".sidebar-toggle")
+    if (!button) return
 
+    const root = document.getElementById("quartz-root")
+    const side = button.dataset.sidebar || "left"
+    const collapsedClass = side + "-sidebar-collapsed"
+    const collapsed = !root?.classList.contains(collapsedClass)
+    root?.classList.toggle(collapsedClass, collapsed)
     syncAllSidebarToggles()
   }
 
-  document.addEventListener("DOMContentLoaded", bindSidebarToggle)
-  document.addEventListener("nav", bindSidebarToggle)
-  document.addEventListener("render", bindSidebarToggle)
-  bindSidebarToggle()
+  document.addEventListener("click", handleToggleClick)
+  document.addEventListener("DOMContentLoaded", syncAllSidebarToggles)
+  document.addEventListener("nav", syncAllSidebarToggles)
+  document.addEventListener("render", syncAllSidebarToggles)
+  syncAllSidebarToggles()
 })()
 `
 
@@ -147,26 +143,33 @@ export const DefaultFrame: PageFrame = {
               ))}
               {!isIndex && (Array.isArray(tags) && tags.length > 0 ? true : date !== undefined) ? (
                 <div class="page-meta-line">
-                  {Array.isArray(tags) &&
-                    tags.map((tag) => (
-                      <a
-                        class="internal tag-link"
-                        href={resolveRelative(
-                          componentData.fileData.slug!,
-                          `tags/${tag}` as FullSlug,
-                        )}
-                      >
-                        {tag}
-                      </a>
-                    ))}
-                  {date && (
+                  {Array.isArray(tags) && tags.length > 0 ? (
+                    <div class="page-tags">
+                      {tags.map((tag) => (
+                        <a
+                          class="internal tag-link"
+                          href={resolveRelative(
+                            componentData.fileData.slug!,
+                            `tags/${tag}` as FullSlug,
+                          )}
+                        >
+                          {tag}
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                  {date ? (
                     <span class="page-date">
-                      <time datetime={date.toISOString()}>{formatNumericDate(date)}</time>
+                      <time dateTime={date.toISOString()}>{formatNumericDate(date)}</time>
                     </span>
-                  )}
-                  {contentMeta.map((BodyComponent) => (
-                    <BodyComponent {...componentData} />
-                  ))}
+                  ) : null}
+                  {contentMeta.length > 0 ? (
+                    <div class="page-reading-meta">
+                      {contentMeta.map((BodyComponent) => (
+                        <BodyComponent {...componentData} />
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>

@@ -157,6 +157,8 @@ plugins:
         grow: true
   - source: github:quartz-community/backlinks
     enabled: true
+    options:
+      hideWhenEmpty: false
     layout:
       position: right
       priority: 50
