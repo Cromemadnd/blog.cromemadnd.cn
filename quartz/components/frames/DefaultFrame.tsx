@@ -174,29 +174,31 @@ export const DefaultFrame: PageFrame = {
               ) : null}
             </div>
             <div class="page-header-actions">
-              <button
-                type="button"
-                class="sidebar-toggle left-sidebar-toggle"
-                data-sidebar="left"
-                aria-label="Hide left sidebar"
-                aria-pressed="false"
-                title="Hide left sidebar"
-              >
-                <SidebarToggleIcon />
-              </button>
-              {toolbar.map((BodyComponent) => (
-                <BodyComponent {...componentData} />
-              ))}
-              <button
-                type="button"
-                class="sidebar-toggle right-sidebar-toggle"
-                data-sidebar="right"
-                aria-label="Hide right sidebar"
-                aria-pressed="false"
-                title="Hide right sidebar"
-              >
-                <SidebarToggleIcon />
-              </button>
+              <div class="toolbar-actions">
+                <button
+                  type="button"
+                  class="sidebar-toggle left-sidebar-toggle"
+                  data-sidebar="left"
+                  aria-label="Hide left sidebar"
+                  aria-pressed="false"
+                  title="Hide left sidebar"
+                >
+                  <SidebarToggleIcon />
+                </button>
+                {toolbar.map((BodyComponent) => (
+                  <BodyComponent {...componentData} />
+                ))}
+                <button
+                  type="button"
+                  class="sidebar-toggle right-sidebar-toggle"
+                  data-sidebar="right"
+                  aria-label="Hide right sidebar"
+                  aria-pressed="false"
+                  title="Hide right sidebar"
+                >
+                  <SidebarToggleIcon />
+                </button>
+              </div>
             </div>
           </div>
           <Content {...componentData} />

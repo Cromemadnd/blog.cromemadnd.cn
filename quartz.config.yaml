@@ -158,7 +158,7 @@ plugins:
   - source: github:quartz-community/backlinks
     enabled: true
     options:
-      hideWhenEmpty: false
+      hideWhenEmpty: true
     layout:
       position: right
       priority: 50
