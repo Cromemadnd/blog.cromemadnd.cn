@@ -9,7 +9,7 @@ summary: ""
 
 ## 引言
 
-在用 `hugo new` 写这篇文章时，我纠结了一下文件名：到底是叫 `authentication` 还是`authorization` 好？
+在写这篇文章时，我纠结了一下文件名：到底是叫 `authentication` 还是`authorization` 好？
 
 然后我突然意识到，不知是不是创造这个词的人有意为之—— `auth` 这个缩写其实非常巧妙地涵盖了这两个概念。
 
