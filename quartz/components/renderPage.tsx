@@ -349,6 +349,11 @@ export function renderPage(
       <body data-slug={slug} data-basepath={basePath}>
         {frame.css && <style dangerouslySetInnerHTML={{ __html: frame.css }} />}
         <div id="quartz-root" class="page" data-frame={frame.name}>
+          <div class="body-bg" aria-hidden="true" />
+          <div class="body-layer" aria-hidden="true" />
+          <div class="left-sidebar-bg" aria-hidden="true" />
+          <div class="page-header-bg" aria-hidden="true" />
+          <div class="right-sidebar-bg" aria-hidden="true" />
           <Body {...componentData}>
             {[
               frame.render({
