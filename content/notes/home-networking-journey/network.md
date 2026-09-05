@@ -1,5 +1,5 @@
 ---
-title: 海内存知己，天涯若比邻 -- 细记一次家庭组网经历 | 网络配置篇
+title: 网络配置篇
 date: 2026-03-11
 tags:
   - networking
@@ -11,13 +11,13 @@ description: 记录一次家庭组网改造中网络层面的规划与配置过�
 
 寒假回家研究了一下家里的网络，惊奇地发现网络环境其实真的不错，完全可以好好地利用一下。
 
-由于篇幅太长，我把软件部分单独写了一篇文章：[软件篇](./home-networking-journey-software)。这一篇就简单记录一下网络层面的改造过程。
+由于篇幅太长，我把软件部分单独写了一篇文章：[软件篇](software.md)。这一篇就简单记录一下网络层面的改造过程。
 
 ## 网络条件
 
 家里买的是电信的千兆套餐，实测下行千兆左右，上行应该是50兆左右。
 
-![Speedtest Result](./assets/speedtest.png)
+![Speedtest Result](speedtest.png)
 
 而且有动态的公网IPv4和IPv6(/60 前缀)! 这点也是随时随地可以访问家里服务器的前提。(如果没有公网ip的话可以打找客服问问试试，也许能申请到) 虽然说会ban掉80和443端口，但其它端口可以直接访问，还是很香的。
 
@@ -41,7 +41,7 @@ description: 记录一次家庭组网改造中网络层面的规划与配置过�
 
 结论先行，先上最后的拓扑图。
 
-![Network Topology](./assets/network-topology.svg)
+![Network Topology](network-topology.svg)
 
 ### 光猫
 

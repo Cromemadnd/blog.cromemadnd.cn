@@ -345,12 +345,12 @@ select {
     // the panel itself leans on real transform 3D: a self-contained perspective
     // (no ancestor perspective, which would reparent the fixed sidebars) turns
     // the inner edge toward the viewer, and the pointer nudges the lean angle
-    transform: perspective(1600px) rotateY(calc(3.5deg - var(--par-x) * 1.8deg));
+    transform: perspective(1600px) rotateY(calc(2deg - var(--par-x) * 1deg));
     transform-origin: left center;
 
     &:hover {
       // the plate notices you and squares up a little, Arknights-style
-      transform: perspective(1600px) rotateY(calc(1.6deg - var(--par-x) * 1.8deg));
+      transform: perspective(1600px) rotateY(calc(1deg - var(--par-x) * 1deg));
     }
   }
 
@@ -365,11 +365,11 @@ select {
     padding: calc(var(--topbar-height) + 2rem) var(--right-content-inline-pad) 2rem var(--right-content-inline-pad);
     // mirrored lean: the content-side (left) edge swings toward the viewer;
     // the skew stays in the chain so the -12° silhouette is preserved
-    transform: perspective(1600px) skewX(-12deg) rotateY(calc(-3.5deg + var(--par-x) * 1.8deg));
+    transform: perspective(1600px) skewX(-12deg) rotateY(calc(-2deg + var(--par-x) * 1deg));
     transform-origin: bottom right;
 
     &:hover {
-      transform: perspective(1600px) skewX(-12deg) rotateY(calc(-1.6deg + var(--par-x) * 1.8deg));
+      transform: perspective(1600px) skewX(-12deg) rotateY(calc(-1deg + var(--par-x) * 1deg));
     }
   }
 
@@ -377,16 +377,28 @@ select {
   // perspective again: the scroll container between here and the panel
   // flattens any inherited 3D context)
   .page>#quartz-body .sidebar.left>.explorer {
-    transform: perspective(1600px) translateZ(34px);
+    transform: perspective(1600px) translateZ(22px);
   }
 
   .page>#quartz-body .sidebar.right>.toc {
-    transform: perspective(1600px) translateZ(34px);
+    transform: perspective(1600px) translateZ(22px);
   }
 
   .page>#quartz-body .sidebar.right>.graph,
   .page>#quartz-body .sidebar.right>.backlinks {
-    transform: perspective(1600px) translateZ(16px);
+    transform: perspective(1600px) translateZ(12px);
+  }
+
+  // The right column rides the -12° shear (the left one doesn't), so content
+  // boxes lay out at the plate's bottom width while the plate is narrowest at
+  // the top: the top rows painted past the viewport edge, and hover-zoomed row
+  // plates spawned horizontal scrollbars. Pull every child's right edge in by
+  // the shear offset at the top padding line — tan(12°) ≈ 0.2126 × the
+  // distance from the bottom pivot — plus a margin for plate shadows.
+  .page>#quartz-body .sidebar.right>.toc,
+  .page>#quartz-body .sidebar.right>.graph,
+  .page>#quartz-body .sidebar.right>.backlinks {
+    width: calc(100% - (100vh - var(--topbar-height) - 2rem) * 0.2126 - 0.5rem);
   }
 
   .page>#quartz-body .page-header {
@@ -1337,6 +1349,33 @@ select {
   opacity: 1;
 }
 
+// footer copyright lines: the quiet last block of every page, sitting above
+// the after-body widgets (comments)
+.footer-copyright {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0 0 1.6rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+
+  p {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  a {
+    color: var(--text-soft);
+    text-decoration: none;
+    transition: color 0.18s ease;
+
+    &:hover {
+      color: var(--edge-hot);
+    }
+  }
+}
+
 .explorer,
 .explorer button,
 .explorer .folder-container div>button,
@@ -1497,6 +1536,47 @@ ul.toc-content.overflow>li>a.in-view,
 ul.toc-content.overflow>li>a[aria-current="true"] {
   color: var(--secondary);
   opacity: 1;
+}
+
+// TOC fold plays the same collapse animation as the explorer folders
+// (grid-template-rows 0fr <-> 1fr over 0.3s) instead of upstream's instant
+// flex-basis snap to 1.4rem — which is neutralized below so the row
+// animation is what the eye sees. Selectors carry the #quartz-body ID chain
+// to out-rank `.page>#quartz-body .sidebar>*`, whose transition list would
+// otherwise swallow the grid-rows one (and whose opacity/transform entries
+// are mirrored here so the sidebar collapse fade keeps working).
+.page>#quartz-body .sidebar .toc {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  transition:
+    grid-template-rows 0.3s ease-in-out,
+    opacity 0.22s var(--chrome-ease),
+    transform 0.28s var(--chrome-ease);
+}
+
+.page>#quartz-body .sidebar .toc:has(> button.toc-header.collapsed) {
+  flex: 0 0.5 auto;
+  grid-template-rows: auto 0fr;
+}
+
+.page>#quartz-body .sidebar ul.toc-content.overflow {
+  min-height: 0;
+  // clips the rows while the track collapses; also keeps the row plates'
+  // right-edge poke from ever turning into a horizontal scrollbar
+  overflow: hidden;
+  margin: 0.5rem 0;
+  padding-bottom: 0.25rem;
+  transition:
+    margin 0.3s ease-in-out,
+    opacity 0.26s ease;
+}
+
+.page>#quartz-body .sidebar .toc:has(> button.toc-header.collapsed) ul.toc-content.overflow {
+  margin-top: 0;
+  margin-bottom: 0;
+  // its padding would otherwise keep a few px of track height alive
+  padding-bottom: 0;
+  opacity: 0;
 }
 
 :where(a, button, input, textarea, select, summary):focus-visible {
@@ -1664,5 +1744,65 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     border: 1px solid var(--edge-line);
     box-shadow: 0.3rem 0.2rem 0 rgba(0, 0, 0, 0.35);
     pointer-events: none;
+  }
+
+  // popup contents join the shear: the input and the results/preview shell
+  // drop their counter-shear and lean with the plate, while long-form result
+  // cards re-square themselves so they stay readable. The fixed +12° on the
+  // cards composes with the parent's animated angle, so they ride the
+  // open/close transition seamlessly.
+  .search>.search-container>.search-space>.search-bar,
+  .search>.search-container>.search-space>.search-layout,
+  .search>.search-container>.search-space>.ghost-text {
+    transform: none;
+  }
+
+  .search>.search-container>.search-space .result-card,
+  .search>.search-container>.search-space .tag-suggestions {
+    transform: skewX(12deg);
+    transform-origin: top left;
+  }
+
+  // the preview pane leans with the plate; hide its vertical scrollbar (the
+  // wheel still scrolls) so no bar crosses the sheared column
+  .search>.search-container>.search-space .preview-container {
+    scrollbar-width: none;
+  }
+
+  .search>.search-container>.search-space .preview-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  // counter-sheared card corners poke past the list box; clip the x axis so
+  // the list keeps its vertical scroll without spawning a horizontal bar,
+  // and pad the sides so nothing actually overflows the clip
+  .search>.search-container>.search-space .results-container {
+    box-sizing: border-box;
+    overflow-x: clip;
+    padding-left: 0.55rem;
+    padding-right: 0.55rem;
+  }
+
+  // opening/closing is the popup swinging into the sheared silhouette: it
+  // rotates up around its top edge (rotateX) while shearing 0 -> -12°, and a
+  // slight overshoot in the ease lands the swing with a bounce instead of a
+  // dead float
+  .search>.search-container>.search-space {
+    transform: perspective(1100px) rotateX(-10deg) skewX(0deg) translateY(0.9rem);
+    // the fade must outlast the swing, or the container turning invisible
+    // would cut off the tail of the close animation
+    transition:
+      opacity 0.4s var(--chrome-ease),
+      transform 0.4s cubic-bezier(0.22, 0.9, 0.28, 1.08);
+  }
+
+  .search>.search-container.active>.search-space {
+    transform: perspective(1100px) rotateX(0deg) skewX(-12deg) translateY(0);
+  }
+
+  .search>.search-container {
+    transition:
+      opacity 0.26s var(--chrome-ease),
+      visibility 0s linear 0.42s;
   }
 }

@@ -14,10 +14,26 @@ const formatNumericDate = (date: Date) => {
 
 const sidebarToggleScript = `
 (() => {
+  // micromorph does not re-execute identical inline scripts, but if a nav ever
+  // does replace this node the listeners below must not double-bind (two
+  // toggles per click would make the buttons look dead)
+  if (window.__quartzSidebarFrameInit) return
+  window.__quartzSidebarFrameInit = true
+
   const sides = ["left", "right"]
   const mobileQuery = window.matchMedia("(max-width: 1199px)")
+  const desktopQuery = window.matchMedia("(min-width: 1200px)")
+  const STORAGE_KEY = "sidebar-visibility"
 
   const root = () => document.getElementById("quartz-root")
+
+  const readSavedState = () => {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {}
+    } catch {
+      return {}
+    }
+  }
 
   const syncSidebarToggle = (button, side, collapsed) => {
     const label = collapsed ? button.dataset.showLabel : button.dataset.hideLabel
@@ -38,6 +54,27 @@ const sidebarToggleScript = `
     }
   }
 
+  // PC-only persistence: re-apply the remembered collapsed state on load and
+  // after every SPA nav (micromorph re-syncs the root's class attribute from
+  // the fresh markup, which would otherwise reset the sidebars).
+  const applySavedSidebarState = () => {
+    const el = root()
+    if (!el || !desktopQuery.matches) return
+    const saved = readSavedState()
+    for (const side of sides) {
+      el.classList.toggle(side + "-sidebar-collapsed", saved[side] === "collapsed")
+    }
+    syncAllSidebarToggles()
+  }
+
+  const persistSidebarState = (side, collapsed) => {
+    const saved = readSavedState()
+    saved[side] = collapsed ? "collapsed" : "open"
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved))
+    } catch {}
+  }
+
   const handleToggleClick = (event) => {
     const button = event.target.closest(".sidebar-toggle")
     if (!button) return
@@ -47,12 +84,13 @@ const sidebarToggleScript = `
     const collapsedClass = side + "-sidebar-collapsed"
     const collapsed = !el?.classList.contains(collapsedClass)
     el?.classList.toggle(collapsedClass, collapsed)
+    persistSidebarState(side, collapsed)
     syncAllSidebarToggles()
   }
 
   document.addEventListener("click", handleToggleClick)
   document.addEventListener("DOMContentLoaded", syncAllSidebarToggles)
-  syncAllSidebarToggles()
+  applySavedSidebarState()
 
   // Mobile bottom bar switches between sub-pages (content is the default).
   // Each sub-page remembers its scroll offset, so leaving a tab and coming
@@ -134,12 +172,25 @@ const sidebarToggleScript = `
   // the scroll memory mid tab-switch).
   let lastUrl = window.location.href
   document.addEventListener("nav", () => {
-    syncAllSidebarToggles()
+    applySavedSidebarState()
     if (!mobileQuery.matches) return
     if (window.location.href === lastUrl) return
     lastUrl = window.location.href
     scrollMemory.clear()
     setMobileView("content")
+  })
+
+  // Crossing the breakpoint: entering desktop restores the remembered state,
+  // leaving it clears the classes so the mobile tab views are unaffected.
+  desktopQuery.addEventListener?.("change", (event) => {
+    if (event.matches) {
+      applySavedSidebarState()
+      return
+    }
+    const el = root()
+    if (!el) return
+    el.classList.remove("left-sidebar-collapsed", "right-sidebar-collapsed")
+    syncAllSidebarToggles()
   })
 
   // Resizing across the breakpoint must not strand the search widget on the
@@ -213,7 +264,9 @@ export const DefaultFrame: PageFrame = {
         !slug.endsWith("/index")
       )
     })
-    const SidebarToggleIcon = () => (
+    // double chevrons pointing at their sidebar: far more recognizable at
+    // 1.15rem than the old two-pane glyph, which read the same on both sides
+    const SidebarToggleIcon = ({ side }: { side: "left" | "right" }) => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
@@ -226,9 +279,17 @@ export const DefaultFrame: PageFrame = {
         stroke-linejoin="round"
         aria-hidden="true"
       >
-        <rect width="18" height="18" x="3" y="3" rx="2" />
-        <path d="M9 3v18" />
-        <path d="M15 3v18" />
+        {side === "left" ? (
+          <>
+            <path d="m11 17-5-5 5-5" />
+            <path d="m18 17-5-5 5-5" />
+          </>
+        ) : (
+          <>
+            <path d="m6 17 5-5-5-5" />
+            <path d="m13 17 5-5-5-5" />
+          </>
+        )}
       </svg>
     )
     const sidebarToggleLabels = (side: "left" | "right") => {
@@ -294,7 +355,7 @@ export const DefaultFrame: PageFrame = {
                   aria-pressed="false"
                   {...sidebarToggleLabels("left")}
                 >
-                  <SidebarToggleIcon />
+                  <SidebarToggleIcon side="left" />
                 </button>
                 {toolbar.map((BodyComponent) => (
                   <BodyComponent {...componentData} />
@@ -306,7 +367,7 @@ export const DefaultFrame: PageFrame = {
                   aria-pressed="false"
                   {...sidebarToggleLabels("right")}
                 >
-                  <SidebarToggleIcon />
+                  <SidebarToggleIcon side="right" />
                 </button>
               </div>
             </div>
@@ -362,6 +423,22 @@ export const DefaultFrame: PageFrame = {
           )}
           <hr />
           <div class="page-footer">
+            <div class="footer-copyright">
+              <p>
+                Copyright{" "}
+                <a href={resolveRelative(componentData.fileData.slug!, "about" as FullSlug)}>
+                  Cromemadnd
+                </a>{" "}
+                2026. All rights reserved
+              </p>
+              <p>
+                Built with{" "}
+                <a href="https://quartz.jzhao.xyz/" target="_blank" rel="noopener">
+                  Quartz
+                </a>{" "}
+                v5.0.0 © 2026
+              </p>
+            </div>
             {afterBody.map((BodyComponent) => (
               <BodyComponent {...componentData} />
             ))}
