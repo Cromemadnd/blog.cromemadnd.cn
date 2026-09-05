@@ -687,7 +687,8 @@ select {
   }
 
   // fixed brand bar, visible on every sub-page (it lives outside .center);
-  // base.scss's grid-era margin-top must not push it down
+  // base.scss's grid-era margin-top must not push it down. A 1fr auto 1fr
+  // grid centers the brand regardless of how wide the action cluster is.
   .page>#quartz-body .page-header {
     position: fixed;
     top: 0;
@@ -695,19 +696,27 @@ select {
     right: 0;
     margin: 0;
     z-index: var(--layer-page-header);
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
+    column-gap: 0.5rem;
     height: var(--mobile-header-height);
     padding: 0 1rem;
     background: var(--bg-panel);
     border-bottom: 1px solid var(--edge-line);
   }
 
+  .page>#quartz-body .page-header>header {
+    grid-column: 1;
+    position: relative;
+  }
+
   .page>#quartz-body .page-header .page-header-actions {
+    grid-column: 3;
+    grid-row: 1;
     display: flex;
     align-items: center;
-    margin-left: auto;
+    justify-self: end;
     pointer-events: auto;
   }
 
@@ -897,10 +906,14 @@ select {
   }
 
   .page>#quartz-body .page-header .site-brand {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
     display: inline-flex;
     align-items: center;
-    // the top bar holds nothing else on touch layouts — give the name room
-    max-width: calc(100vw - 4.5rem);
+    // the action cluster collapses to zero width on touch layouts (its buttons
+    // are all hidden), so the bar's padding is the only real neighbor
+    max-width: calc(100vw - 5rem);
     gap: 0.6rem;
     // stays below the desktop size so the hierarchy doesn't invert
     font-size: 1.3rem;
@@ -1410,4 +1423,139 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
 :where(a, button, input, textarea, select, summary):focus-visible {
   outline: 2px solid var(--edge-hot);
   outline-offset: 2px;
+}
+
+// ---------------------------------------------------------------------------
+// Layered nav plates (desktop only): every explorer / TOC entry sits on a
+// 12°-sheared parallelogram slab, and deeper hierarchy levels recede —
+// translateZ via a self-contained perspective() (no ancestor 3D context
+// needed, so sidebar overflow-scroll can't flatten it) plus a dimming fill,
+// which reads as plates stacked at different depths.
+// ---------------------------------------------------------------------------
+@media all and (min-width: #{map.get($breakpoints, desktop)}) {
+  .explorer .explorer-content .tree-item-self,
+  ul.toc-content.overflow>li>a {
+    position: relative;
+    z-index: 0;
+  }
+
+  .explorer .explorer-content .tree-item-self::before,
+  ul.toc-content.overflow>li>a::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--plate-fill);
+    border: 1px solid var(--plate-edge);
+    // left edge is the pivot so all plates shear in register
+    transform: perspective(680px) translateZ(var(--plate-z)) skewX(var(--plate-skew));
+    transform-origin: 0 50%;
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease;
+  }
+
+  // hover/current overrides are set on the pseudo-element itself so they beat
+  // the inherited per-depth custom properties below
+  .explorer .explorer-content .tree-item-self:hover::before,
+  .explorer .explorer-content ul li>a.active::before,
+  .explorer .explorer-content ul li>a[aria-current="page"]::before,
+  ul.toc-content.overflow>li>a:hover::before {
+    --plate-fill: rgba(159, 220, 255, 0.08);
+    --plate-edge: rgba(159, 220, 255, 0.4);
+  }
+
+  // explorer rows: depth follows UL nesting depth
+  .explorer .explorer-content ul li>.tree-item-self {
+    --plate-skew: -12deg;
+    --plate-z: 0px;
+    --plate-fill: rgba(255, 255, 255, 0.05);
+    --plate-edge: rgba(255, 255, 255, 0.11);
+  }
+
+  .explorer .explorer-content ul ul li>.tree-item-self {
+    --plate-z: -16px;
+    --plate-fill: rgba(255, 255, 255, 0.032);
+    --plate-edge: rgba(255, 255, 255, 0.075);
+  }
+
+  .explorer .explorer-content ul ul ul li>.tree-item-self {
+    --plate-z: -30px;
+    --plate-fill: rgba(255, 255, 255, 0.02);
+    --plate-edge: rgba(255, 255, 255, 0.06);
+  }
+
+  .explorer .explorer-content ul ul ul ul li>.tree-item-self {
+    --plate-z: -42px;
+    --plate-fill: rgba(255, 255, 255, 0.012);
+    --plate-edge: rgba(255, 255, 255, 0.045);
+  }
+
+  // rows need real padding so the plate frames the text instead of hugging it
+  .explorer .explorer-content ul li>a.tree-item-self {
+    display: block;
+    padding: 0.26rem 0.65rem;
+  }
+
+  .explorer .explorer-content .folder-container.tree-item-self {
+    padding: 0.26rem 0.65rem;
+  }
+
+  // a sheared plate's corner pokes ~4px past its row; without this the tree
+  // list (overflow: auto) turns that bleed into a horizontal scrollbar
+  .explorer .explorer-content ul.explorer-ul {
+    overflow-x: clip;
+  }
+
+  // TOC rows: the right sidebar column is itself skewX(-12deg), so the plates
+  // stay unskewed rects here — the parent transform supplies the parallelogram
+  ul.toc-content.overflow>li>a {
+    --plate-skew: 0deg;
+    --plate-z: 0px;
+    --plate-fill: rgba(255, 255, 255, 0.045);
+    --plate-edge: rgba(255, 255, 255, 0.1);
+    display: block;
+    padding: 0.24rem 0.6rem;
+    margin: 0 0 3px;
+  }
+
+  ul.toc-content.overflow>li.depth-2>a {
+    --plate-z: -16px;
+    --plate-fill: rgba(255, 255, 255, 0.028);
+    --plate-edge: rgba(255, 255, 255, 0.07);
+  }
+
+  ul.toc-content.overflow>li.depth-3>a,
+  ul.toc-content.overflow>li.depth-4>a,
+  ul.toc-content.overflow>li.depth-5>a,
+  ul.toc-content.overflow>li.depth-6>a {
+    --plate-z: -30px;
+    --plate-fill: rgba(255, 255, 255, 0.016);
+    --plate-edge: rgba(255, 255, 255, 0.055);
+  }
+
+  // the top-bar search button joins the plate family (desktop only; on mobile
+  // the search renders as a plain bar inside the explorer sub-page)
+  .page>#quartz-body .page-header .search .search-button {
+    position: relative;
+    z-index: 0;
+  }
+
+  .page>#quartz-body .page-header .search .search-button::before {
+    content: "";
+    position: absolute;
+    inset: 0.06rem 0.34rem;
+    z-index: -1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transform: skewX(-12deg);
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease;
+  }
+
+  .page>#quartz-body .page-header .search .search-button:hover::before {
+    background: rgba(159, 220, 255, 0.09);
+    border-color: rgba(159, 220, 255, 0.42);
+  }
 }

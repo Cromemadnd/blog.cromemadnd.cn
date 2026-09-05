@@ -52,19 +52,26 @@ const sidebarToggleScript = `
 
   document.addEventListener("click", handleToggleClick)
   document.addEventListener("DOMContentLoaded", syncAllSidebarToggles)
-  document.addEventListener("nav", syncAllSidebarToggles)
   syncAllSidebarToggles()
 
   // Mobile bottom bar switches between sub-pages (content is the default).
-  document.addEventListener("click", (event) => {
-    const button = event.target.closest(".mobile-nav button[data-nav]")
-    if (!button || !mobileQuery.matches) return
+  // Each sub-page remembers its scroll offset, so leaving a tab and coming
+  // back keeps the reader's place.
+  const scrollMemory = new Map()
 
+  const setMobileView = (nav) => {
     const el = root()
     if (!el) return
-    const nav = button.dataset.nav
-    el.dataset.mobileView = nav
-    window.scrollTo({ top: 0 })
+    const prev = el.dataset.mobileView || "content"
+    if (nav !== prev) {
+      scrollMemory.set(prev, window.scrollY)
+      el.dataset.mobileView = nav
+      // the target region only exists in layout once the attribute flipped;
+      // wait a frame so its stored offset is reachable
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: scrollMemory.get(nav) ?? 0, behavior: "instant" })
+      })
+    }
 
     // The search widget lives in the header for desktop, but on the explorer
     // tab it becomes the page's search bar: relocate the node (fixed
@@ -86,6 +93,44 @@ const sidebarToggleScript = `
         new CustomEvent("nav", { detail: { url: window.location.pathname } }),
       )
     }
+  }
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest(".mobile-nav button[data-nav]")
+    if (!button || !mobileQuery.matches) return
+    setMobileView(button.dataset.nav)
+  })
+
+  // On mobile the TOC lives in its own sub-page with the article hidden, so a
+  // heading anchor has nothing to scroll: capture the click before the SPA
+  // router, switch to the content sub-page, then glide to the section.
+  document.addEventListener("click", (event) => {
+    if (!mobileQuery.matches) return
+    const link = event.target.closest('.toc-content a[href^="#"]')
+    if (!link) return
+    const id = decodeURIComponent(link.getAttribute("href").slice(1))
+    const target = document.getElementById(id)
+    if (!target) return
+    event.preventDefault()
+    event.stopPropagation()
+    setMobileView("content")
+    requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "start" })
+    })
+  }, true)
+
+  // A real navigation lands on a fresh page: back to the content sub-page at
+  // the top. The synthetic nav event setMobileView fires for the graph keeps
+  // the same URL, so it must not be mistaken for navigation (it would wipe
+  // the scroll memory mid tab-switch).
+  let lastUrl = window.location.href
+  document.addEventListener("nav", () => {
+    syncAllSidebarToggles()
+    if (!mobileQuery.matches) return
+    if (window.location.href === lastUrl) return
+    lastUrl = window.location.href
+    scrollMemory.clear()
+    setMobileView("content")
   })
 })()
 `
