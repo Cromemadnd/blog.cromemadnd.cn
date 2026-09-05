@@ -137,7 +137,7 @@ plugins:
     enabled: true
   - source: ./plugins/tag-page
     enabled: true
-  - source: github:quartz-community/explorer
+  - source: ./plugins/explorer
     enabled: true
     layout:
       position: left

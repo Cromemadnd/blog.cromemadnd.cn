@@ -342,6 +342,16 @@ select {
     flex-direction: column;
     width: var(--left-cut-width);
     padding: calc(var(--topbar-height) + 1.5rem) clamp(2.25rem, 3vw, 3.6rem) 2rem clamp(1.5rem, 2vw, 2rem);
+    // the panel itself leans on real transform 3D: a self-contained perspective
+    // (no ancestor perspective, which would reparent the fixed sidebars) turns
+    // the inner edge toward the viewer, and the pointer nudges the lean angle
+    transform: perspective(1600px) rotateY(calc(3.5deg - var(--par-x) * 1.8deg));
+    transform-origin: left center;
+
+    &:hover {
+      // the plate notices you and squares up a little, Arknights-style
+      transform: perspective(1600px) rotateY(calc(1.6deg - var(--par-x) * 1.8deg));
+    }
   }
 
 
@@ -353,8 +363,30 @@ select {
     gap: 1.2rem;
     width: var(--right-cut-bg-width);
     padding: calc(var(--topbar-height) + 2rem) var(--right-content-inline-pad) 2rem var(--right-content-inline-pad);
-    transform: skewX(-12deg);
+    // mirrored lean: the content-side (left) edge swings toward the viewer;
+    // the skew stays in the chain so the -12° silhouette is preserved
+    transform: perspective(1600px) skewX(-12deg) rotateY(calc(-3.5deg + var(--par-x) * 1.8deg));
     transform-origin: bottom right;
+
+    &:hover {
+      transform: perspective(1600px) skewX(-12deg) rotateY(calc(-1.6deg + var(--par-x) * 1.8deg));
+    }
+  }
+
+  // content blocks float off their panel at fixed depths (self-contained
+  // perspective again: the scroll container between here and the panel
+  // flattens any inherited 3D context)
+  .page>#quartz-body .sidebar.left>.explorer {
+    transform: perspective(1600px) translateZ(34px);
+  }
+
+  .page>#quartz-body .sidebar.right>.toc {
+    transform: perspective(1600px) translateZ(34px);
+  }
+
+  .page>#quartz-body .sidebar.right>.graph,
+  .page>#quartz-body .sidebar.right>.backlinks {
+    transform: perspective(1600px) translateZ(16px);
   }
 
   .page>#quartz-body .page-header {
@@ -1053,6 +1085,26 @@ select {
   position: relative;
 }
 
+// The fullscreen overlay lives inside .page-header-actions (fixed, z=6), so
+// its paint order is capped by that stacking context — the article title
+// (.page-header-main, an independent z=7 context) and the brand would float
+// above the dimming layer. While the popup is open, drop those below it.
+// On touch layouts the overlay instead rides in the left-sidebar context
+// (z=5), so the whole fixed header drops under that.
+.page:has(.search>.search-container.active)>#quartz-body .page-header-main {
+  z-index: 5;
+}
+
+.page:has(.search>.search-container.active)>#quartz-body .page-header .site-brand {
+  z-index: 0;
+}
+
+@media all and (max-width: #{map.get($breakpoints, desktop) - 1}) {
+  .page:has(.search>.search-container.active)>#quartz-body .page-header {
+    z-index: 3;
+  }
+}
+
 .page>#quartz-body .page-header .flex-component,
 .page>#quartz-body .page-header .page-header-actions,
 .page>#quartz-body .page-header .toolbar-actions,
@@ -1299,6 +1351,12 @@ select {
   min-width: 0;
 }
 
+// the whole folder row follows the folder link (not just its title), so the
+// cursor should say so across the plate
+.explorer .folder-container.tree-item-self {
+  cursor: pointer;
+}
+
 .explorer.collapsed,
 .explorer:not(.collapsed) {
   flex: 1 1 auto;
@@ -1321,20 +1379,13 @@ select {
   display: none;
 }
 
-.explorer .explorer-content .folder-outer,
-.explorer .explorer-content .folder-outer.open {
-  visibility: visible;
-  display: grid;
-  grid-template-rows: 1fr;
-}
-
 .explorer .explorer-content .folder-outer>ul {
-  overflow: visible;
-}
-
-.explorer li:has(> .folder-outer:not(.open))>.folder-container>svg,
-.explorer.collapsed .fold {
-  transform: none;
+  // upstream clips this list while the 0fr→1fr collapse animation runs; the
+  // right padding keeps the sheared plate corners inside the clip instead of
+  // getting sliced off vertically
+  box-sizing: border-box;
+  overflow: hidden;
+  padding-right: 0.45rem;
 }
 
 .explorer .title-button h2 {
@@ -1345,11 +1396,19 @@ select {
 
 .explorer .explorer-content ul li>a,
 .explorer .folder-container div>a,
-.explorer .folder-container div>button span,
-.explorer .folder-icon {
+.explorer .folder-container div>button span {
   transition:
     color 0.18s ease,
     opacity 0.18s ease;
+}
+
+// the chevron's rotate needs its own transition; 0.3s matches the folder
+// collapse animation (.folder-outer grid-template-rows) so they land together
+.explorer .folder-icon {
+  transition:
+    color 0.18s ease,
+    opacity 0.18s ease,
+    transform 0.3s ease;
 }
 
 .explorer .explorer-content ul li>a:hover,
@@ -1590,38 +1649,20 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     --plate-shadow: 0.06rem 0.05rem 0 rgba(0, 0, 0, 0.45);
   }
 
-  // the top-bar search button joins the plate family (desktop only; on mobile
-  // the search renders as a plain bar inside the explorer sub-page)
-  .page>#quartz-body .page-header .search .search-button {
-    position: relative;
-    z-index: 0;
-  }
-
-  .page>#quartz-body .page-header .search .search-button::before {
+  // the search popup gets the same plate treatment: .search-space already
+  // carries the -12° shear, so an unskewed pseudo-element of its own paints a
+  // parallelogram backplate while the bar/results stay counter-sheared (their
+  // text reads upright). The hard extrusion shadow matches the sidebar plates.
+  .search>.search-container>.search-space::before {
     content: "";
     position: absolute;
-    inset: 0.06rem 0.34rem;
+    inset: -1rem -1.4rem;
     z-index: -1;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0.14rem 0.11rem 0 rgba(0, 0, 0, 0.5);
-    transform: perspective(680px) translateZ(0px) skewX(-12deg);
-    transition:
-      background-color 0.18s ease,
-      border-color 0.18s ease,
-      box-shadow 0.18s ease,
-      transform 0.18s var(--chrome-ease);
-  }
-
-  .page>#quartz-body .page-header .search .search-button:hover::before {
-    background: rgba(159, 220, 255, 0.09);
-    border-color: rgba(159, 220, 255, 0.42);
-    box-shadow: 0.26rem 0.2rem 0 rgba(0, 0, 0, 0.55);
-    transform: perspective(680px) translateZ(14px) skewX(-12deg);
-  }
-
-  .page>#quartz-body .page-header .search .search-button:active::before {
-    transform: perspective(680px) translateZ(-8px) skewX(-12deg);
-    box-shadow: 0.04rem 0.03rem 0 rgba(0, 0, 0, 0.4);
+    background:
+      linear-gradient(90deg, rgba(159, 220, 255, 0.045), transparent 40%),
+      var(--bg-panel);
+    border: 1px solid var(--edge-line);
+    box-shadow: 0.3rem 0.2rem 0 rgba(0, 0, 0, 0.35);
+    pointer-events: none;
   }
 }
