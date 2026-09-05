@@ -23,6 +23,10 @@
   --topbar-height: 6rem;
   --mobile-nav-height: 3.6rem;
   --mobile-header-height: 4rem;
+  // pointer parallax (desktop only, driven by the frame script): background
+  // layers translate at layer-dependent rates, foreground stays put
+  --par-x: 0;
+  --par-y: 0;
   --left-cut-width: clamp(18rem, 24vw, 24rem);
   --right-cut-width: clamp(17rem, 22vw, 22rem);
   --right-cut-bg-width: calc(var(--right-cut-width) + 7rem);
@@ -80,6 +84,9 @@ body {
   z-index: var(--layer-body-bg);
   pointer-events: none;
   transform: skewX(-12deg);
+  // deepest layer: largest parallax drift, opposite the pointer
+  translate: calc(var(--par-x) * -14px) calc(var(--par-y) * -9px);
+  transition: translate 0.3s var(--chrome-ease);
   transform-origin: center;
   overflow: hidden;
   isolation: isolate;
@@ -247,12 +254,19 @@ select {
     pointer-events: none;
     transform: skewX(-12deg);
     transform-origin: top left;
+    // mid-depth layer: gentle pointer drift; `translate` (not transform) so
+    // the collapsed-state transform override never fights the parallax
+    translate: calc(var(--par-x) * 9px) calc(var(--par-y) * 5px);
     background:
       linear-gradient(90deg, rgba(255, 255, 255, 0.035), transparent 42%), var(--bg-panel);
     border-right: 1px solid var(--edge-soft);
+    // hard offset shadow (no blur): the Arknights plate-extrusion cue,
+    // poking toward the content side where it stays visible
+    box-shadow: 0.3rem 0.2rem 0 rgba(0, 0, 0, 0.35);
     transition:
       opacity 0.28s var(--chrome-ease),
-      transform 0.32s var(--chrome-ease);
+      transform 0.32s var(--chrome-ease),
+      translate 0.3s var(--chrome-ease);
   }
 
   .page-header-bg {
@@ -261,9 +275,12 @@ select {
     z-index: var(--layer-page-header-bg);
     height: var(--topbar-height);
     pointer-events: none;
+    translate: calc(var(--par-x) * 4px) calc(var(--par-y) * 2px);
     background: rgba(10, 10, 10, 0.6);
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     backdrop-filter: blur(6px);
+    box-shadow: 0 0.22rem 0 rgba(0, 0, 0, 0.35);
+    transition: translate 0.3s var(--chrome-ease);
   }
 
   .right-sidebar-bg {
@@ -276,12 +293,15 @@ select {
     pointer-events: none;
     transform: skewX(-12deg);
     transform-origin: bottom right;
+    translate: calc(var(--par-x) * 6px) calc(var(--par-y) * 3px);
     background:
       linear-gradient(270deg, rgba(255, 255, 255, 0.035), transparent 48%), rgba(10, 10, 10, 0.76);
     border-left: 1px solid var(--edge-soft);
+    box-shadow: -0.3rem 0.2rem 0 rgba(0, 0, 0, 0.4);
     transition:
       opacity 0.28s var(--chrome-ease),
-      transform 0.32s var(--chrome-ease);
+      transform 0.32s var(--chrome-ease),
+      translate 0.3s var(--chrome-ease);
   }
 
   .page>#quartz-body .sidebar {
@@ -1447,12 +1467,30 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     z-index: -1;
     background: var(--plate-fill);
     border: 1px solid var(--plate-edge);
+    // Arknights plate cue #1: hard offset shadow (no blur) extruding the slab
+    box-shadow: var(--plate-shadow);
     // left edge is the pivot so all plates shear in register
     transform: perspective(680px) translateZ(var(--plate-z)) skewX(var(--plate-skew));
     transform-origin: 0 50%;
     transition:
       background-color 0.18s ease,
-      border-color 0.18s ease;
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      transform 0.18s var(--chrome-ease);
+  }
+
+  // hover pops the slab toward the viewer (positive Z grows it slightly and
+  // lifts the shadow); pressing drops it back below its rest depth
+  .explorer .explorer-content .tree-item-self:hover::before,
+  ul.toc-content.overflow>li>a:hover::before {
+    --plate-z: 18px;
+    --plate-shadow: 0.3rem 0.22rem 0 rgba(0, 0, 0, 0.6);
+  }
+
+  .explorer .explorer-content .tree-item-self:active::before,
+  ul.toc-content.overflow>li>a:active::before {
+    --plate-z: -10px;
+    --plate-shadow: 0.04rem 0.03rem 0 rgba(0, 0, 0, 0.4);
   }
 
   // hover/current overrides are set on the pseudo-element itself so they beat
@@ -1465,30 +1503,35 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     --plate-edge: rgba(159, 220, 255, 0.4);
   }
 
-  // explorer rows: depth follows UL nesting depth
+  // explorer rows: depth follows UL nesting depth; nearer plates cast the
+  // bigger hard shadow
   .explorer .explorer-content ul li>.tree-item-self {
     --plate-skew: -12deg;
     --plate-z: 0px;
     --plate-fill: rgba(255, 255, 255, 0.05);
     --plate-edge: rgba(255, 255, 255, 0.11);
+    --plate-shadow: 0.16rem 0.12rem 0 rgba(0, 0, 0, 0.55);
   }
 
   .explorer .explorer-content ul ul li>.tree-item-self {
     --plate-z: -16px;
     --plate-fill: rgba(255, 255, 255, 0.032);
     --plate-edge: rgba(255, 255, 255, 0.075);
+    --plate-shadow: 0.12rem 0.09rem 0 rgba(0, 0, 0, 0.5);
   }
 
   .explorer .explorer-content ul ul ul li>.tree-item-self {
     --plate-z: -30px;
     --plate-fill: rgba(255, 255, 255, 0.02);
     --plate-edge: rgba(255, 255, 255, 0.06);
+    --plate-shadow: 0.08rem 0.06rem 0 rgba(0, 0, 0, 0.45);
   }
 
   .explorer .explorer-content ul ul ul ul li>.tree-item-self {
     --plate-z: -42px;
     --plate-fill: rgba(255, 255, 255, 0.012);
     --plate-edge: rgba(255, 255, 255, 0.045);
+    --plate-shadow: 0.05rem 0.04rem 0 rgba(0, 0, 0, 0.4);
   }
 
   // rows need real padding so the plate frames the text instead of hugging it
@@ -1501,19 +1544,30 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     padding: 0.26rem 0.65rem;
   }
 
-  // a sheared plate's corner pokes ~4px past its row; without this the tree
-  // list (overflow: auto) turns that bleed into a horizontal scrollbar
+  // a sheared plate's corner pokes ~4px past its row (the hard extrusion
+  // shadow a few px more); without this the tree list (overflow: auto) turns
+  // that bleed into a horizontal scrollbar — the side padding keeps the
+  // shadow inside the clip instead of slicing it off. border-box matters:
+  // content-box + padding widens the list past .explorer's own scroll area.
   .explorer .explorer-content ul.explorer-ul {
+    box-sizing: border-box;
     overflow-x: clip;
+    padding-left: 0.35rem;
+    padding-right: 0.45rem;
   }
 
   // TOC rows: the right sidebar column is itself skewX(-12deg), so the plates
   // stay unskewed rects here — the parent transform supplies the parallelogram
+  ul.toc-content.overflow {
+    padding-right: 0.4rem;
+  }
+
   ul.toc-content.overflow>li>a {
     --plate-skew: 0deg;
     --plate-z: 0px;
     --plate-fill: rgba(255, 255, 255, 0.045);
     --plate-edge: rgba(255, 255, 255, 0.1);
+    --plate-shadow: 0.14rem 0.11rem 0 rgba(0, 0, 0, 0.55);
     display: block;
     padding: 0.24rem 0.6rem;
     margin: 0 0 3px;
@@ -1523,6 +1577,7 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     --plate-z: -16px;
     --plate-fill: rgba(255, 255, 255, 0.028);
     --plate-edge: rgba(255, 255, 255, 0.07);
+    --plate-shadow: 0.1rem 0.08rem 0 rgba(0, 0, 0, 0.5);
   }
 
   ul.toc-content.overflow>li.depth-3>a,
@@ -1532,6 +1587,7 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     --plate-z: -30px;
     --plate-fill: rgba(255, 255, 255, 0.016);
     --plate-edge: rgba(255, 255, 255, 0.055);
+    --plate-shadow: 0.06rem 0.05rem 0 rgba(0, 0, 0, 0.45);
   }
 
   // the top-bar search button joins the plate family (desktop only; on mobile
@@ -1548,14 +1604,24 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     z-index: -1;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    transform: skewX(-12deg);
+    box-shadow: 0.14rem 0.11rem 0 rgba(0, 0, 0, 0.5);
+    transform: perspective(680px) translateZ(0px) skewX(-12deg);
     transition:
       background-color 0.18s ease,
-      border-color 0.18s ease;
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      transform 0.18s var(--chrome-ease);
   }
 
   .page>#quartz-body .page-header .search .search-button:hover::before {
     background: rgba(159, 220, 255, 0.09);
     border-color: rgba(159, 220, 255, 0.42);
+    box-shadow: 0.26rem 0.2rem 0 rgba(0, 0, 0, 0.55);
+    transform: perspective(680px) translateZ(14px) skewX(-12deg);
+  }
+
+  .page>#quartz-body .page-header .search .search-button:active::before {
+    transform: perspective(680px) translateZ(-8px) skewX(-12deg);
+    box-shadow: 0.04rem 0.03rem 0 rgba(0, 0, 0, 0.4);
   }
 }

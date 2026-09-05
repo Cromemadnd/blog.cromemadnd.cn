@@ -59,6 +59,26 @@ const sidebarToggleScript = `
   // back keeps the reader's place.
   const scrollMemory = new Map()
 
+  // The search widget lives in the header for desktop, but on the explorer
+  // tab it becomes the page's search bar (fixed positioning inside the header
+  // paints unreliably there). Once it sits in the sidebar it is no longer a
+  // ".page-header" descendant, so the lookup must cover both homes or any
+  // "move it back" logic would silently never fire.
+  const findSearchWidget = () =>
+    document.querySelector(".page-header .search") ??
+    document.querySelector(".sidebar.left > .search")
+
+  const placeSearchWidget = (nav) => {
+    const search = findSearchWidget()
+    if (!search) return
+    if (nav === "left") {
+      document.querySelector(".sidebar.left")?.prepend(search)
+    } else if (search.closest(".sidebar")) {
+      const host = document.querySelector(".toolbar-actions .flex-component")
+      ;(host ?? document.querySelector(".toolbar-actions"))?.appendChild(search)
+    }
+  }
+
   const setMobileView = (nav) => {
     const el = root()
     if (!el) return
@@ -73,18 +93,7 @@ const sidebarToggleScript = `
       })
     }
 
-    // The search widget lives in the header for desktop, but on the explorer
-    // tab it becomes the page's search bar: relocate the node (fixed
-    // positioning inside the header paints unreliably here).
-    const search = document.querySelector(".page-header .search")
-    if (search) {
-      if (nav === "left") {
-        document.querySelector(".sidebar.left")?.prepend(search)
-      } else if (search.closest(".sidebar")) {
-        const host = document.querySelector(".toolbar-actions .flex-component")
-        ;(host ?? document.querySelector(".toolbar-actions"))?.appendChild(search)
-      }
-    }
+    placeSearchWidget(nav)
 
     // the graph sizes itself at nav time and has no resize listener, so it
     // renders at zero size if its view was hidden — re-trigger its build
@@ -131,6 +140,32 @@ const sidebarToggleScript = `
     lastUrl = window.location.href
     scrollMemory.clear()
     setMobileView("content")
+  })
+
+  // Resizing across the breakpoint must not strand the search widget on the
+  // wrong side: leaving mobile always returns it to the toolbar, and entering
+  // mobile with the explorer tab still active takes it back into the sidebar.
+  mobileQuery.addEventListener?.("change", (event) => {
+    if (event.matches) {
+      if (root()?.dataset.mobileView === "left") placeSearchWidget("left")
+    } else {
+      placeSearchWidget("content")
+    }
+  })
+
+  // Arknights-style depth: the background layers sit at different distances,
+  // so they drift with the pointer at layer-dependent rates (CSS translates
+  // the plates via --par-x/--par-y; foreground content stays put). rAF-throttled.
+  const parallaxQuery = window.matchMedia("(min-width: 1200px) and (pointer: fine)")
+  let parallaxRaf = 0
+  window.addEventListener("mousemove", (event) => {
+    if (!parallaxQuery.matches || parallaxRaf) return
+    parallaxRaf = requestAnimationFrame(() => {
+      parallaxRaf = 0
+      const el = document.documentElement.style
+      el.setProperty("--par-x", (event.clientX / window.innerWidth - 0.5).toFixed(4))
+      el.setProperty("--par-y", (event.clientY / window.innerHeight - 0.5).toFixed(4))
+    })
   })
 })()
 `
