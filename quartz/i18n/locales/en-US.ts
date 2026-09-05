@@ -45,6 +45,19 @@ export default {
       title: "Recent Notes",
       seeRemainingMore: ({ remaining }) => `See ${remaining} more →`,
     },
+    sidebar: {
+      showLeft: "Show left sidebar",
+      hideLeft: "Hide left sidebar",
+      showRight: "Show right sidebar",
+      hideRight: "Hide right sidebar",
+    },
+    mobileNav: {
+      label: "Page sections",
+      explorer: "Explore",
+      content: "Article",
+      toc: "Contents",
+      comments: "Comments",
+    },
     transcludes: {
       transcludeOf: ({ targetSlug }) => `Transclude of ${targetSlug}`,
       linkToOriginal: "Link to original",

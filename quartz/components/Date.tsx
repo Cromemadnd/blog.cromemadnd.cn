@@ -17,12 +17,11 @@ export function getDate(data: QuartzPluginData): Date | undefined {
   return data.dates?.[data.defaultDateType]
 }
 
-export function formatDate(d: Date, locale: ValidLocale = "en-US"): string {
-  return d.toLocaleDateString(locale, {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  })
+// ISO format everywhere: it matches the numeric date style in the page header
+// and avoids mixing locale-specific month names into the terminal-styled UI.
+export function formatDate(d: Date, _locale: ValidLocale = "en-US"): string {
+  const pad = (n: number) => `${n}`.padStart(2, "0")
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
 export function Date({ date, locale }: Props) {

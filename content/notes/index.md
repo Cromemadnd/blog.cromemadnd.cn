@@ -1,10 +1,7 @@
 ---
 title: 笔记
-date: 2026-3-11
-summary: This is the index of all posts.
-tags: []
+date: 2026-03-11
+description: 技术与学习笔记，记录并分享我在技术方面的学习心得。
 ---
-
-# Notes
 
 这里主要放一些笔记，用于记录与分享我技术方面的学习心得。

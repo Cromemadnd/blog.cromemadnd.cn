@@ -37,9 +37,13 @@ export interface Theme {
 
 export type ThemeKey = keyof Colors
 
+// CJK families must precede the generic fallbacks: content is mostly Chinese,
+// and without them each OS picks an arbitrary system font (or a serif default
+// on Windows), which clashes with the loaded latin fonts.
 const DEFAULT_SANS_SERIF =
-  'system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'
-const DEFAULT_MONO = "ui-monospace, SFMono-Regular, SF Mono, Menlo, monospace"
+  'system-ui, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'
+const DEFAULT_MONO =
+  'ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", monospace'
 
 export function getFontSpecificationName(spec: FontSpecification): string {
   if (typeof spec === "string") {

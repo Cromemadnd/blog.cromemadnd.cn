@@ -30,16 +30,18 @@ configuration:
         tertiary: "#84a59d"
         highlight: rgba(143, 159, 169, 0.15)
         textHighlight: "#fff23688"
+      # Mirrors the site palette defined in quartz/styles/custom.scss.
+      # OG share cards are generated from darkMode (see og-image colorScheme).
       darkMode:
-        light: "#161618"
-        lightgray: "#393639"
-        gray: "#646464"
-        darkgray: "#d4d4d4"
-        dark: "#ebebec"
-        secondary: "#7b97aa"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#b3aa0288"
+        light: "#000000"
+        lightgray: "#202020"
+        gray: "#555555"
+        darkgray: "#e0e0e0"
+        dark: "#e0e0e0"
+        secondary: "#9fdcff"
+        tertiary: "#f4c76a"
+        highlight: rgba(159, 220, 255, 0.12)
+        textHighlight: rgba(244, 199, 106, 0.28)
 plugins:
   - source: github:quartz-community/created-modified-date
     enabled: true
@@ -73,7 +75,6 @@ plugins:
     layout:
       position: right
       priority: 10
-      display: desktop-only
   - source: github:quartz-community/crawl-links
     enabled: true
     options:
@@ -117,14 +118,14 @@ plugins:
       display: all
   - source: github:quartz-community/alias-redirects
     enabled: true
-  - source: github:quartz-community/content-index
+  - source: ./plugins/content-index
     enabled: true
     options:
       enableSiteMap: true
       enableRSS: true
   - source: github:quartz-community/favicon
     enabled: true
-  - source: github:quartz-community/og-image
+  - source: ./plugins/og-image
     enabled: true
   - source: github:quartz-community/cname
     enabled: true
@@ -132,9 +133,9 @@ plugins:
     enabled: true
   - source: github:quartz-community/content-page
     enabled: true
-  - source: github:quartz-community/folder-page
+  - source: ./plugins/folder-page
     enabled: true
-  - source: github:quartz-community/tag-page
+  - source: ./plugins/tag-page
     enabled: true
   - source: github:quartz-community/explorer
     enabled: true
@@ -146,8 +147,7 @@ plugins:
     layout:
       position: right
       priority: 30
-      display: desktop-only
-  - source: github:quartz-community/search
+  - source: ./plugins/search
     enabled: true
     layout:
       position: beforeBody
@@ -162,15 +162,16 @@ plugins:
     layout:
       position: right
       priority: 50
-      display: desktop-only
   - source: github:quartz-community/article-title
     enabled: true
     layout:
       position: beforeBody
       priority: 10
       condition: not-index
-  - source: github:quartz-community/content-meta
+  - source: ./plugins/content-meta
     enabled: true
+    options:
+      showDate: false
     layout:
       position: beforeBody
       priority: 20
@@ -180,12 +181,12 @@ plugins:
       position: beforeBody
       priority: 18
   - source: github:quartz-community/page-title
-    enabled: true
+    enabled: false
     layout:
       position: left
       priority: 10
   - source: github:quartz-community/darkmode
-    enabled: true
+    enabled: false
     layout:
       position: beforeBody
       priority: 30
@@ -202,7 +203,7 @@ plugins:
       position: beforeBody
       priority: 5
       condition: not-index
-  - source: github:quartz-community/comments
+  - source: ./plugins/comments
     enabled: true
     options:
       provider: giscus
@@ -211,14 +212,12 @@ plugins:
         repoId: R_kgDOSqVEGQ
         category: Announcements
         categoryId: DIC_kwDOSqVEGc4C-A8q
-        mapping: url
-        strict: true
-        reactionsEnabled: true
-        inputPosition: bottom
-        themeUrl: https://giscus.app/themes
+        mapping: pathname
+        strict: false
+        inputPosition: top
+        lang: zh-CN
         lightTheme: light
-        darkTheme: dark
-        lang: zh
+        darkTheme: transparent_dark
     layout:
       position: afterBody
       priority: 10
@@ -285,10 +284,12 @@ layout:
         - reader-mode
       positions:
         right: []
+        afterBody: []
     tag:
       exclude:
         - reader-mode
       positions:
         right: []
+        afterBody: []
     canvas: {}
     bases: {}

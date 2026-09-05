@@ -1,8 +1,7 @@
 ---
 title: 泥嚎！
-summary: This is the homepage of the blog.
+description: Cromemadnd 的个人博客首页——技术笔记、项目与生活随笔的入口。
 ---
-
 欢迎来到我的小窝！在这里，你可以找到：
 
 - [Projects](/projects/) - 一些我做过的项目

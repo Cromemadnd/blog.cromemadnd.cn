@@ -23,15 +23,8 @@ body {
   color: var(--darkgray);
 }
 
-.text-highlight {
-  background-color: var(--textHighlight);
-  padding: 0 0.1rem;
-  border-radius: 5px;
-}
-::selection {
-  background: color-mix(in srgb, var(--tertiary) 60%, rgba(255, 255, 255, 0));
-  color: var(--darkgray);
-}
+// ::selection is themed once in custom.scss (edge-hot + white); a second
+// definition here would silently fight it depending on file order.
 
 p,
 ul,
@@ -211,7 +204,7 @@ a {
       grid-template-areas: #{map.get($mobileGrid, templateAreas)};
     }
 
-    @media all and not ($desktop) {
+    @media all and ($mobile) {
       padding: 0 1rem;
     }
     @media all and ($mobile) {
@@ -228,44 +221,17 @@ a {
       position: sticky;
     }
 
+    // mobile sidebar presentation is owned by custom.scss (tab views)
     & .sidebar.left {
       z-index: 1;
       grid-area: grid-sidebar-left;
       flex-direction: column;
-      @media all and ($mobile) {
-        gap: 0;
-        align-items: center;
-        position: initial;
-        display: flex;
-        height: unset;
-        flex-direction: row;
-        padding: 0;
-        padding-top: 2rem;
-      }
     }
 
     & .sidebar.right {
       grid-area: grid-sidebar-right;
       margin-right: 0;
       flex-direction: column;
-      @media all and ($mobile) {
-        margin-left: inherit;
-        margin-right: inherit;
-      }
-      @media all and not ($desktop) {
-        position: initial;
-        height: unset;
-        width: 100%;
-        flex-direction: row;
-        padding: 0;
-        & > * {
-          flex: 1;
-          max-height: 24rem;
-        }
-        & > .toc {
-          display: none;
-        }
-      }
     }
     & .page-header,
     & .page-footer {

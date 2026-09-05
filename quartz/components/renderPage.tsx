@@ -344,7 +344,10 @@ export function renderPage(
       ? ""
       : new URL(`https://${cfg.baseUrl}`).pathname.replace(/\/$/, "")
   const doc = (
-    <html lang={lang} dir={direction}>
+    // The site is dark-only by design (custom.scss forces a single palette and
+    // the darkmode toggle is disabled); the syntax-highlighting theme switches
+    // on this attribute, so pin it statically.
+    <html lang={lang} dir={direction} saved-theme="dark">
       <Head {...componentData} />
       <body data-slug={slug} data-basepath={basePath}>
         {frame.css && <style dangerouslySetInnerHTML={{ __html: frame.css }} />}

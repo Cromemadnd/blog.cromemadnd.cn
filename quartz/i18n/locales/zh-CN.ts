@@ -45,6 +45,19 @@ export default {
       title: "最近的笔记",
       seeRemainingMore: ({ remaining }) => `查看更多${remaining}篇笔记 →`,
     },
+    sidebar: {
+      showLeft: "展开左侧栏",
+      hideLeft: "收起左侧栏",
+      showRight: "展开右侧栏",
+      hideRight: "收起右侧栏",
+    },
+    mobileNav: {
+      label: "页面分区",
+      explorer: "导航",
+      content: "正文",
+      toc: "目录",
+      comments: "评论",
+    },
     transcludes: {
       transcludeOf: ({ targetSlug }) => `包含${targetSlug}`,
       linkToOriginal: "指向原始笔记的链接",
@@ -67,7 +80,7 @@ export default {
     },
     error: {
       title: "无法找到",
-      notFound: "私有笔记或笔记不存在。",
+      notFound: "页面不存在，或者已经被移动到了别处。",
       home: "返回首页",
     },
     folderContent: {

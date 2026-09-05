@@ -4,9 +4,8 @@ date: 2025-10-26
 tags:
   - design
   - backend
-summary: ""
+description: 从「Java 接口很鸡肋」的困惑出发，结合 Golang Web 开发的实践，谈谈接口、黑箱抽象、契约编程与命名规范的价值与取舍。
 ---
-
 ## 引言
 
 之前接触Java时，总是感觉接口（Interface）这种东西好像很鸡肋，有点抽象——为什么要在具体实现之外再多写一个抽象层呢？直到前几天写Golang Web服务，在死抠[分层设计与代码规范](./reflections-on-layered-architecture)时，才终于明白接口的价值所在。于是，我打算把一些思考和体会记录在这篇文章里。

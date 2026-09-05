@@ -4,9 +4,8 @@ date: 2025-10-26
 tags:
   - auth
   - microservices
-summary: ""
+description: 从 authentication 与 authorization 的词源巧合谈起，梳理微服务架构中认证与鉴权的概念边界，记录一些实现思路与实践经验。
 ---
-
 ## 引言
 
 在写这篇文章时，我纠结了一下文件名：到底是叫 `authentication` 还是`authorization` 好？
