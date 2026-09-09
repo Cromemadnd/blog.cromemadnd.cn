@@ -90,10 +90,12 @@ body {
   transform-origin: center;
   overflow: hidden;
   isolation: isolate;
-  background-image: conic-gradient(var(--checker-dark) 25%,
-      var(--checker-light) 0 50%,
-      var(--checker-dark) 0 75%,
-      var(--checker-light) 0);
+  background-image: conic-gradient(
+    var(--checker-dark) 25%,
+    var(--checker-light) 0 50%,
+    var(--checker-dark) 0 75%,
+    var(--checker-light) 0
+  );
   background-size: 12rem 12rem;
   opacity: 0.5;
 }
@@ -119,31 +121,31 @@ body {
   max-width: 100%;
 }
 
-.page>#quartz-body {
+.page > #quartz-body {
   position: relative;
   min-height: 100vh;
 }
 
-.page>.body-bg {
+.page > .body-bg {
   z-index: var(--layer-body-bg);
 }
 
-.page>.body-layer {
+.page > .body-layer {
   position: fixed;
   inset: 0;
   z-index: var(--layer-body);
   pointer-events: none;
 }
 
-.page>.left-sidebar-bg {
+.page > .left-sidebar-bg {
   z-index: var(--layer-left-sidebar-bg);
 }
 
-.page>.page-header-bg {
+.page > .page-header-bg {
   z-index: var(--layer-page-header-bg);
 }
 
-.page>.right-sidebar-bg {
+.page > .right-sidebar-bg {
   z-index: var(--layer-right-sidebar-bg);
 }
 
@@ -153,7 +155,7 @@ body {
   line-break: strict;
 }
 
-.page article>h1:first-child {
+.page article > h1:first-child {
   margin-top: 0;
 }
 
@@ -172,7 +174,7 @@ body {
 .page blockquote,
 .page pre,
 .page code,
-.page .table-container>table,
+.page .table-container > table,
 .page input,
 .page textarea,
 .page select,
@@ -213,11 +215,13 @@ body {
   border: 1px solid var(--edge-line);
   background:
     linear-gradient(135deg, rgba(159, 220, 255, 0.08), rgba(255, 255, 255, 0)),
-    repeating-linear-gradient(90deg,
+    repeating-linear-gradient(
+      90deg,
       rgba(255, 255, 255, 0.035) 0,
       rgba(255, 255, 255, 0.035) 1px,
       transparent 1px,
-      transparent 12px),
+      transparent 12px
+    ),
     var(--bg-img);
   color: var(--text-muted);
   font-family: var(--codeFont);
@@ -225,7 +229,7 @@ body {
   line-height: 1.4;
 }
 
-a.external .external-icon>path {
+a.external .external-icon > path {
   fill: var(--secondary);
 }
 
@@ -237,7 +241,7 @@ select {
 }
 
 @media all and (min-width: #{map.get($breakpoints, desktop)}) {
-  .page>#quartz-body {
+  .page > #quartz-body {
     grid-template-columns: var(--left-cut-width) minmax(0, 1fr) var(--right-cut-bg-width);
     column-gap: 0;
     overflow: clip;
@@ -304,7 +308,7 @@ select {
       translate 0.3s var(--chrome-ease);
   }
 
-  .page>#quartz-body .sidebar {
+  .page > #quartz-body .sidebar {
     position: fixed;
     top: 0;
     bottom: 0;
@@ -320,14 +324,14 @@ select {
       transform 0.32s var(--chrome-ease);
   }
 
-  .page>#quartz-body .sidebar>* {
+  .page > #quartz-body .sidebar > * {
     position: relative;
     transition:
       opacity 0.22s var(--chrome-ease),
       transform 0.28s var(--chrome-ease);
   }
 
-  .page>#quartz-body .sidebar.right>* {
+  .page > #quartz-body .sidebar.right > * {
     z-index: var(--layer-right-sidebar);
     box-sizing: border-box;
     width: 100%;
@@ -335,13 +339,14 @@ select {
     min-width: 0;
   }
 
-  .page>#quartz-body .sidebar.left {
+  .page > #quartz-body .sidebar.left {
     left: 0;
     z-index: var(--layer-left-sidebar);
     display: flex;
     flex-direction: column;
     width: var(--left-cut-width);
-    padding: calc(var(--topbar-height) + 1.5rem) clamp(2.25rem, 3vw, 3.6rem) 2rem clamp(1.5rem, 2vw, 2rem);
+    padding: calc(var(--topbar-height) + 1.5rem) clamp(2.25rem, 3vw, 3.6rem) 2rem
+      clamp(1.5rem, 2vw, 2rem);
     // the panel itself leans on real transform 3D: a self-contained perspective
     // (no ancestor perspective, which would reparent the fixed sidebars) turns
     // the inner edge toward the viewer, and the pointer nudges the lean angle
@@ -354,15 +359,15 @@ select {
     }
   }
 
-
-  .page>#quartz-body .sidebar.right {
+  .page > #quartz-body .sidebar.right {
     right: 0;
     z-index: var(--layer-right-sidebar);
     display: flex;
     flex-direction: column;
     gap: 1.2rem;
     width: var(--right-cut-bg-width);
-    padding: calc(var(--topbar-height) + 2rem) var(--right-content-inline-pad) 2rem var(--right-content-inline-pad);
+    padding: calc(var(--topbar-height) + 2rem) var(--right-content-inline-pad) 2rem
+      var(--right-content-inline-pad);
     // mirrored lean: the content-side (left) edge swings toward the viewer;
     // the skew stays in the chain so the -12° silhouette is preserved
     transform: perspective(1600px) skewX(-12deg) rotateY(calc(-2deg + var(--par-x) * 1deg));
@@ -376,16 +381,16 @@ select {
   // content blocks float off their panel at fixed depths (self-contained
   // perspective again: the scroll container between here and the panel
   // flattens any inherited 3D context)
-  .page>#quartz-body .sidebar.left>.explorer {
+  .page > #quartz-body .sidebar.left > .explorer {
     transform: perspective(1600px) translateZ(22px);
   }
 
-  .page>#quartz-body .sidebar.right>.toc {
+  .page > #quartz-body .sidebar.right > .toc {
     transform: perspective(1600px) translateZ(22px);
   }
 
-  .page>#quartz-body .sidebar.right>.graph,
-  .page>#quartz-body .sidebar.right>.backlinks {
+  .page > #quartz-body .sidebar.right > .graph,
+  .page > #quartz-body .sidebar.right > .backlinks {
     transform: perspective(1600px) translateZ(12px);
   }
 
@@ -395,13 +400,13 @@ select {
   // plates spawned horizontal scrollbars. Pull every child's right edge in by
   // the shear offset at the top padding line — tan(12°) ≈ 0.2126 × the
   // distance from the bottom pivot — plus a margin for plate shadows.
-  .page>#quartz-body .sidebar.right>.toc,
-  .page>#quartz-body .sidebar.right>.graph,
-  .page>#quartz-body .sidebar.right>.backlinks {
+  .page > #quartz-body .sidebar.right > .toc,
+  .page > #quartz-body .sidebar.right > .graph,
+  .page > #quartz-body .sidebar.right > .backlinks {
     width: calc(100% - (100vh - var(--topbar-height) - 2rem) * 0.2126 - 0.5rem);
   }
 
-  .page>#quartz-body .page-header {
+  .page > #quartz-body .page-header {
     position: fixed;
     top: 0;
     left: 0;
@@ -420,7 +425,7 @@ select {
 
   // the title/meta block lives in .center for the mobile tab layout, but on
   // desktop it overlays the fixed header bar exactly as before
-  .page>#quartz-body .page-header-main {
+  .page > #quartz-body .page-header-main {
     position: fixed;
     top: 0;
     left: 0;
@@ -434,7 +439,7 @@ select {
     pointer-events: none;
   }
 
-  .page>#quartz-body .page-header>header {
+  .page > #quartz-body .page-header > header {
     position: relative;
     display: flex;
     align-items: center;
@@ -442,7 +447,7 @@ select {
     pointer-events: auto;
   }
 
-  .page>#quartz-body .page-header .site-brand {
+  .page > #quartz-body .page-header .site-brand {
     position: absolute;
     top: 50%;
     left: clamp(1.25rem, 3vw, 3rem);
@@ -462,22 +467,21 @@ select {
     pointer-events: auto;
   }
 
-  .page>#quartz-body .page-header .site-brand img {
+  .page > #quartz-body .page-header .site-brand img {
     width: 3rem;
     height: 3rem;
     flex: 0 0 auto;
     object-fit: cover;
   }
 
-  .page>#quartz-body .page-header .site-brand span {
+  .page > #quartz-body .page-header .site-brand span {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-
-  .page>#quartz-body .page-header-main .article-title {
+  .page > #quartz-body .page-header-main .article-title {
     grid-column: 2;
     justify-self: center;
     max-width: min(58rem, 58vw);
@@ -490,39 +494,23 @@ select {
     pointer-events: none;
   }
 
-  .page>#quartz-body .page-header-main .content-meta {
-    grid-column: 2;
-    justify-self: center;
-    grid-row: 2;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0.25rem 0 0;
-    text-align: center;
-    pointer-events: none;
-  }
-
-  .page>#quartz-body .page-header-main .page-meta-line {
+  .page > #quartz-body .page-header-main .page-meta-block {
     grid-column: 2;
     grid-row: 2;
     justify-self: center;
     display: flex;
-    max-width: min(58rem, 58vw);
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 0.45rem 0.75rem;
-    margin: 0.35rem 0 0;
-    overflow: visible;
+    gap: 0.18rem;
+    margin: 0.25rem 0 0;
+    max-width: min(58rem, 58vw);
     text-align: center;
-    white-space: nowrap;
+    pointer-events: none;
   }
 
-  .page>#quartz-body .page-header-main .page-tags {
-    grid-column: 2;
-    grid-row: 2;
-    justify-self: center;
+  .page > #quartz-body .page-header-main .page-tags {
     display: inline-flex;
-    max-width: min(30rem, 36vw);
+    max-width: min(44rem, 50vw);
     min-width: 0;
     align-items: center;
     justify-content: center;
@@ -533,7 +521,24 @@ select {
     white-space: nowrap;
   }
 
-  .page>#quartz-body .page-header .page-header-actions {
+  .page > #quartz-body .page-header-main .page-date-meta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .page > #quartz-body .page-header-main .meta-separator {
+    color: var(--edge-soft);
+    opacity: 0.7;
+    font-size: 0.75rem;
+    user-select: none;
+  }
+
+  .page > #quartz-body .page-header .page-header-actions {
     position: fixed;
     top: calc((var(--topbar-height) - 2.2rem) / 2);
     right: calc(clamp(1.25rem, 3vw, 3rem) + 0.35rem);
@@ -545,7 +550,7 @@ select {
     pointer-events: auto;
   }
 
-  .page>#quartz-body .page-header .toolbar-actions {
+  .page > #quartz-body .page-header .toolbar-actions {
     display: inline-flex;
     align-items: center;
     justify-content: flex-end;
@@ -553,14 +558,14 @@ select {
     pointer-events: auto;
   }
 
-  .page>#quartz-body .page-header-main .article-title,
-  .page>#quartz-body .page-header-main .content-meta,
-  .page>#quartz-body .page-header-main .page-tags,
-  .page>#quartz-body .page-header-main .page-meta-line {
+  .page > #quartz-body .page-header-main .article-title,
+  .page > #quartz-body .page-header-main .page-meta-block,
+  .page > #quartz-body .page-header-main .page-tags,
+  .page > #quartz-body .page-header-main .page-date-meta {
     position: relative;
   }
 
-  .page>#quartz-body .page-header .page-header-actions .flex-component {
+  .page > #quartz-body .page-header .page-header-actions .flex-component {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -570,11 +575,11 @@ select {
     pointer-events: auto;
   }
 
-  .page.left-sidebar-collapsed>#quartz-body {
+  .page.left-sidebar-collapsed > #quartz-body {
     grid-template-columns: 0 minmax(0, 1fr) var(--right-cut-bg-width);
   }
 
-  .page.left-sidebar-collapsed>#quartz-body .sidebar.left {
+  .page.left-sidebar-collapsed > #quartz-body .sidebar.left {
     width: 0;
     min-width: 0;
     padding-left: 0;
@@ -585,7 +590,7 @@ select {
     pointer-events: none;
   }
 
-  .page.left-sidebar-collapsed>#quartz-body .sidebar.left>* {
+  .page.left-sidebar-collapsed > #quartz-body .sidebar.left > * {
     opacity: 0;
     transform: translateX(-0.8rem);
     pointer-events: none;
@@ -596,19 +601,19 @@ select {
     transform: skewX(-12deg) translateX(calc(var(--left-cut-width) * -0.4));
   }
 
-  .page.left-sidebar-collapsed>#quartz-body .center {
+  .page.left-sidebar-collapsed > #quartz-body .center {
     margin-left: 0;
   }
 
-  .page.left-sidebar-collapsed>#quartz-body .center {
+  .page.left-sidebar-collapsed > #quartz-body .center {
     width: calc(100vw - var(--right-cut-bg-width));
   }
 
-  .page.right-sidebar-collapsed>#quartz-body {
+  .page.right-sidebar-collapsed > #quartz-body {
     grid-template-columns: var(--left-cut-width) minmax(0, 1fr) 0;
   }
 
-  .page.right-sidebar-collapsed>#quartz-body .sidebar.right {
+  .page.right-sidebar-collapsed > #quartz-body .sidebar.right {
     width: 0;
     min-width: 0;
     padding-left: 0;
@@ -618,7 +623,7 @@ select {
     pointer-events: none;
   }
 
-  .page.right-sidebar-collapsed>#quartz-body .sidebar.right>* {
+  .page.right-sidebar-collapsed > #quartz-body .sidebar.right > * {
     opacity: 0;
     transform: translateX(0.8rem);
     pointer-events: none;
@@ -629,18 +634,20 @@ select {
     transform: skewX(-12deg) translateX(calc(var(--right-cut-bg-width) * 0.35));
   }
 
-  .page.right-sidebar-collapsed>#quartz-body .center {
+  .page.right-sidebar-collapsed > #quartz-body .center {
     width: calc(100vw - var(--left-cut-width) - var(--content-left-gap));
   }
 
-  .page.left-sidebar-collapsed.right-sidebar-collapsed>#quartz-body .center {
+  .page.left-sidebar-collapsed.right-sidebar-collapsed > #quartz-body .center {
     width: 100vw;
   }
 
-  .page>#quartz-body .center {
+  .page > #quartz-body .center {
     position: relative;
     box-sizing: border-box;
-    width: calc(100vw - var(--left-cut-width) - var(--right-cut-bg-width) - var(--content-left-gap));
+    width: calc(
+      100vw - var(--left-cut-width) - var(--right-cut-bg-width) - var(--content-left-gap)
+    );
     max-width: none;
     min-width: 0;
     margin-left: calc(var(--left-cut-width) + var(--content-left-gap));
@@ -651,10 +658,10 @@ select {
       margin-left 0.32s var(--chrome-ease);
   }
 
-  .page>#quartz-body .center>article,
-  .page>#quartz-body .center>.page-footer,
-  .page>#quartz-body .center>hr {
-    position: relative;
+  .page > #quartz-body .center > article,
+  .page > #quartz-body .center > .footer-copyright,
+  .page > #quartz-body .center > .page-footer,
+  .page > #quartz-body .center > hr {
     z-index: 1;
     box-sizing: border-box;
     width: 100%;
@@ -662,9 +669,9 @@ select {
     min-width: 0;
   }
 
-  .page>#quartz-body .center>.page-footer>*,
-  .page>#quartz-body .center>.page-footer iframe,
-  .page>#quartz-body .center>.page-footer .giscus {
+  .page > #quartz-body .center > .page-footer > *,
+  .page > #quartz-body .center > .page-footer iframe,
+  .page > #quartz-body .center > .page-footer .giscus {
     width: 100%;
     max-width: none;
   }
@@ -673,7 +680,7 @@ select {
     scroll-margin-top: calc(var(--topbar-height) + 1rem);
   }
 
-  .page>#quartz-body .center {
+  .page > #quartz-body .center {
     padding-top: calc(var(--topbar-height) + 1.4rem);
   }
 }
@@ -689,7 +696,7 @@ select {
     display: none;
   }
 
-  .page>#quartz-body {
+  .page > #quartz-body {
     display: block;
     min-height: auto;
     padding: 0 1rem calc(var(--mobile-nav-height) + 1.25rem + env(safe-area-inset-bottom));
@@ -697,47 +704,47 @@ select {
     overflow: visible;
   }
 
-  .page>#quartz-body .sidebar {
+  .page > #quartz-body .sidebar {
     position: initial;
     height: auto;
     padding: 0;
     background: transparent;
   }
 
-  .page>#quartz-body .sidebar.left {
+  .page > #quartz-body .sidebar.left {
     padding-top: 1rem;
   }
 
   // Mobile is a tabbed sub-page layout: the bottom bar switches the visible
   // region through data-mobile-view on .page ("content" is the default).
-  .page>#quartz-body .sidebar.left,
-  .page>#quartz-body .sidebar.right {
+  .page > #quartz-body .sidebar.left,
+  .page > #quartz-body .sidebar.right {
     display: none;
     width: 100%;
     padding: 1.25rem 1rem 0;
   }
 
-  .page[data-mobile-view="left"]>#quartz-body .sidebar.left,
-  .page[data-mobile-view="right"]>#quartz-body .sidebar.right {
+  .page[data-mobile-view="left"] > #quartz-body .sidebar.left,
+  .page[data-mobile-view="right"] > #quartz-body .sidebar.right {
     display: flex;
     flex-direction: column;
   }
 
-  .page[data-mobile-view="left"]>#quartz-body .center,
-  .page[data-mobile-view="right"]>#quartz-body .center {
+  .page[data-mobile-view="left"] > #quartz-body .center,
+  .page[data-mobile-view="right"] > #quartz-body .center {
     display: none;
   }
 
   // comments view: the center column keeps its topbar header but shows only
   // the page footer (the comments widget)
-  .page[data-mobile-view="comments"]>#quartz-body .center {
+  .page[data-mobile-view="comments"] > #quartz-body .center {
     padding-top: calc(var(--mobile-header-height) + 0.75rem);
   }
-
-  .page[data-mobile-view="comments"]>#quartz-body .center .page-header-main,
-  .page[data-mobile-view="comments"]>#quartz-body .center>article,
-  .page[data-mobile-view="comments"]>#quartz-body .center>hr,
-  .page[data-mobile-view="comments"]>#quartz-body .center .home-recent-notes {
+  .page[data-mobile-view="comments"] > #quartz-body .center .page-header-main,
+  .page[data-mobile-view="comments"] > #quartz-body .center > article,
+  .page[data-mobile-view="comments"] > #quartz-body .center > hr,
+  .page[data-mobile-view="comments"] > #quartz-body .center > .footer-copyright,
+  .page[data-mobile-view="comments"] > #quartz-body .center .home-recent-notes {
     display: none;
   }
 
@@ -753,7 +760,7 @@ select {
   // fixed brand bar, visible on every sub-page (it lives outside .center);
   // base.scss's grid-era margin-top must not push it down. A 1fr auto 1fr
   // grid centers the brand regardless of how wide the action cluster is.
-  .page>#quartz-body .page-header {
+  .page > #quartz-body .page-header {
     position: fixed;
     top: 0;
     left: 0;
@@ -770,12 +777,12 @@ select {
     border-bottom: 1px solid var(--edge-line);
   }
 
-  .page>#quartz-body .page-header>header {
+  .page > #quartz-body .page-header > header {
     grid-column: 1;
     position: relative;
   }
 
-  .page>#quartz-body .page-header .page-header-actions {
+  .page > #quartz-body .page-header .page-header-actions {
     grid-column: 3;
     grid-row: 1;
     display: flex;
@@ -785,13 +792,13 @@ select {
   }
 
   // content column clears the fixed bar
-  .page>#quartz-body .center,
-  .page[data-mobile-view="left"]>#quartz-body .sidebar.left,
-  .page[data-mobile-view="right"]>#quartz-body .sidebar.right {
+  .page > #quartz-body .center,
+  .page[data-mobile-view="left"] > #quartz-body .sidebar.left,
+  .page[data-mobile-view="right"] > #quartz-body .sidebar.right {
     padding-top: calc(var(--mobile-header-height) + 0.75rem);
   }
 
-  .page>#quartz-body .page-header .toolbar-actions {
+  .page > #quartz-body .page-header .toolbar-actions {
     display: inline-flex;
     align-items: center;
     justify-content: flex-end;
@@ -799,7 +806,7 @@ select {
     pointer-events: auto;
   }
 
-  .page>#quartz-body .page-header .page-header-actions .flex-component {
+  .page > #quartz-body .page-header .page-header-actions .flex-component {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -809,8 +816,8 @@ select {
     pointer-events: auto;
   }
 
-  .page>#quartz-body .page-header,
-  .page>#quartz-body .center {
+  .page > #quartz-body .page-header,
+  .page > #quartz-body .center {
     margin-left: 0;
     margin-right: 0;
     padding-left: 0;
@@ -823,14 +830,14 @@ select {
 
   // tablet widths: readable measure instead of full-bleed columns
   @media all and (min-width: #{map.get($breakpoints, mobile) + 1}) {
-    .page>#quartz-body .center {
+    .page > #quartz-body .center {
       max-width: 42rem;
       margin-left: auto;
       margin-right: auto;
     }
 
-    .page[data-mobile-view="left"]>#quartz-body .sidebar.left,
-    .page[data-mobile-view="right"]>#quartz-body .sidebar.right {
+    .page[data-mobile-view="left"] > #quartz-body .sidebar.left,
+    .page[data-mobile-view="right"] > #quartz-body .sidebar.right {
       max-width: 30rem;
       margin-left: auto;
       margin-right: auto;
@@ -838,8 +845,8 @@ select {
   }
 
   // comments live in their own tab on mobile
-  .page:not([data-mobile-view="comments"])>#quartz-body .center>hr,
-  .page:not([data-mobile-view="comments"])>#quartz-body .center>.page-footer {
+  .page:not([data-mobile-view="comments"]) > #quartz-body .center > hr,
+  .page:not([data-mobile-view="comments"]) > #quartz-body .center > .page-footer {
     display: none;
   }
 
@@ -854,11 +861,11 @@ select {
 
   // no search button in the mobile top bar; on the explorer tab the frame
   // script moves the search widget into the sidebar and it renders as a bar
-  .page>#quartz-body .page-header .search .search-button {
+  .page > #quartz-body .page-header .search .search-button {
     display: none;
   }
 
-  .page[data-mobile-view="left"]>#quartz-body .sidebar.left .search {
+  .page[data-mobile-view="left"] > #quartz-body .sidebar.left .search {
     display: block;
     // the explorer tree carries order:-1 in the sidebar flex column
     order: -2;
@@ -870,7 +877,7 @@ select {
   // upstream explorer styles pull the tree out of flow on mobile (dropdown
   // pattern: 100vw wide, translateX off-screen, overflow hidden); here it
   // must be a plain in-flow block that stacks under the search bar
-  .page[data-mobile-view="left"]>#quartz-body .sidebar.left .explorer-content {
+  .page[data-mobile-view="left"] > #quartz-body .sidebar.left .explorer-content {
     position: static;
     width: auto;
     max-width: 100%;
@@ -881,12 +888,12 @@ select {
     transform: none;
   }
 
-  .page[data-mobile-view="left"]>#quartz-body .sidebar.left .explorer .explorer-content ul li a {
+  .page[data-mobile-view="left"] > #quartz-body .sidebar.left .explorer .explorer-content ul li a {
     white-space: normal;
     overflow-wrap: anywhere;
   }
 
-  .page[data-mobile-view="left"]>#quartz-body .sidebar.left .search .search-button {
+  .page[data-mobile-view="left"] > #quartz-body .sidebar.left .search .search-button {
     display: flex;
     align-items: center;
     gap: 0.55rem;
@@ -899,7 +906,7 @@ select {
     text-align: left;
   }
 
-  .page[data-mobile-view="left"]>#quartz-body .sidebar.left .search .search-button p {
+  .page[data-mobile-view="left"] > #quartz-body .sidebar.left .search .search-button p {
     position: static;
     width: auto;
     height: auto;
@@ -916,12 +923,12 @@ select {
     display: none;
   }
 
-  .page>#quartz-body .page-header>header {
+  .page > #quartz-body .page-header > header {
     position: relative;
   }
 
   // bottom bar replaces the topbar sidebar toggles on touch layouts
-  .page>#quartz-body .page-header .toolbar-actions>.sidebar-toggle {
+  .page > #quartz-body .page-header .toolbar-actions > .sidebar-toggle {
     display: none;
   }
 
@@ -969,7 +976,7 @@ select {
     color: var(--secondary);
   }
 
-  .page>#quartz-body .page-header .site-brand {
+  .page > #quartz-body .page-header .site-brand {
     grid-column: 2;
     grid-row: 1;
     justify-self: center;
@@ -983,43 +990,49 @@ select {
     font-size: 1.3rem;
   }
 
-  .page>#quartz-body .page-header .site-brand span {
+  .page > #quartz-body .page-header .site-brand span {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .page>#quartz-body .page-header .site-brand img {
+  .page > #quartz-body .page-header .site-brand img {
     width: 2.1rem;
     height: 2.1rem;
   }
 
-  .page>#quartz-body .page-header-main .article-title {
+  .page > #quartz-body .page-header-main .article-title {
     max-width: min(58rem, calc(100vw - 2rem));
   }
 
-  .page>#quartz-body .page-header-main .content-meta {
+  .page > #quartz-body .page-header-main .content-meta {
     max-width: calc(100vw - 2rem);
   }
 
-  .page>#quartz-body .page-header-main .page-meta-line {
+  .page > #quartz-body .page-header-main .page-meta-block {
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     max-width: calc(100vw - 2rem);
-    gap: 0.35rem 0.75rem;
-    flex-wrap: wrap;
-    white-space: normal;
+    gap: 0.25rem;
+    margin-top: 0.4rem;
   }
 
-  .page>#quartz-body .page-header-main .page-tags {
-    display: inline-flex;
+  .page > #quartz-body .page-header-main .page-tags {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.42rem;
+    max-width: 100%;
   }
 
-
-  .page>#quartz-body .page-header-main .page-tags {
-    max-width: 48vw;
+  .page > #quartz-body .page-header-main .page-date-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
   }
 }
 
@@ -1035,17 +1048,17 @@ select {
   z-index: var(--overlay-z);
 }
 
-.search>.search-container,
-.search>.search-container>.search-space,
-.search>.search-container>.search-space>.search-bar,
-.search>.search-container>.search-space>.search-layout,
-.search>.search-container>.search-space>.search-layout>.results-container,
-.search>.search-container>.search-space>.search-layout>.preview-container,
-.search>.search-container>.search-space>.tag-suggestions {
+.search > .search-container,
+.search > .search-container > .search-space,
+.search > .search-container > .search-space > .search-bar,
+.search > .search-container > .search-space > .search-layout,
+.search > .search-container > .search-space > .search-layout > .results-container,
+.search > .search-container > .search-space > .search-layout > .preview-container,
+.search > .search-container > .search-space > .tag-suggestions {
   z-index: var(--overlay-z);
 }
 
-.search>.search-container {
+.search > .search-container {
   position: fixed;
   inset: 0;
   display: block !important;
@@ -1060,7 +1073,7 @@ select {
     visibility 0s linear 0.26s;
 }
 
-.search>.search-container.active {
+.search > .search-container.active {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
@@ -1069,7 +1082,7 @@ select {
     visibility 0s linear;
 }
 
-.search>.search-container>.search-space {
+.search > .search-container > .search-space {
   transform: translateY(0.9rem) skewX(-12deg);
   transform-origin: top center;
   opacity: 0;
@@ -1078,22 +1091,22 @@ select {
     transform 0.32s var(--chrome-ease);
 }
 
-.search>.search-container.active>.search-space {
+.search > .search-container.active > .search-space {
   transform: translateY(0) skewX(-12deg);
   opacity: 1;
 }
 
-.search>.search-container>.search-space>.search-bar,
-.search>.search-container>.search-space>.search-layout,
-.search>.search-container>.search-space>.tag-suggestions,
-.search>.search-container>.search-space>.ghost-text {
+.search > .search-container > .search-space > .search-bar,
+.search > .search-container > .search-space > .search-layout,
+.search > .search-container > .search-space > .tag-suggestions,
+.search > .search-container > .search-space > .ghost-text {
   transform: skewX(12deg);
   transform-origin: top center;
 }
 
-.search>.search-container>.search-space,
-.search>.search-container>.search-space>.search-layout>.results-container,
-.search>.search-container>.search-space>.search-layout>.preview-container {
+.search > .search-container > .search-space,
+.search > .search-container > .search-space > .search-layout > .results-container,
+.search > .search-container > .search-space > .search-layout > .preview-container {
   position: relative;
 }
 
@@ -1103,32 +1116,32 @@ select {
 // above the dimming layer. While the popup is open, drop those below it.
 // On touch layouts the overlay instead rides in the left-sidebar context
 // (z=5), so the whole fixed header drops under that.
-.page:has(.search>.search-container.active)>#quartz-body .page-header-main {
+.page:has(.search > .search-container.active) > #quartz-body .page-header-main {
   z-index: 5;
 }
 
-.page:has(.search>.search-container.active)>#quartz-body .page-header .site-brand {
+.page:has(.search > .search-container.active) > #quartz-body .page-header .site-brand {
   z-index: 0;
 }
 
 @media all and (max-width: #{map.get($breakpoints, desktop) - 1}) {
-  .page:has(.search>.search-container.active)>#quartz-body .page-header {
+  .page:has(.search > .search-container.active) > #quartz-body .page-header {
     z-index: 3;
   }
 }
 
-.page>#quartz-body .page-header .flex-component,
-.page>#quartz-body .page-header .page-header-actions,
-.page>#quartz-body .page-header .toolbar-actions,
-.page>#quartz-body .page-header .page-header-actions .sidebar-toggle {
+.page > #quartz-body .page-header .flex-component,
+.page > #quartz-body .page-header .page-header-actions,
+.page > #quartz-body .page-header .toolbar-actions,
+.page > #quartz-body .page-header .page-header-actions .sidebar-toggle {
   margin-right: 0;
 }
 
-.page>#quartz-body .page-header .toolbar-actions>.flex-component {
+.page > #quartz-body .page-header .toolbar-actions > .flex-component {
   display: contents;
 }
 
-.page>#quartz-body .page-header .toolbar-actions>.flex-component>div {
+.page > #quartz-body .page-header .toolbar-actions > .flex-component > div {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1199,15 +1212,17 @@ select {
   height: 1.15rem;
 }
 
-
+.page-meta-block,
 .page-meta-line {
   color: var(--text-muted);
   font-size: 0.86rem;
   line-height: 1.35;
 }
 
+.page-meta-block .tag-link,
+.page-meta-block .content-meta > span,
 .page-meta-line .tag-link,
-.page-meta-line .content-meta>span {
+.page-meta-line .content-meta > span {
   display: inline-flex;
   align-items: center;
   min-height: 0;
@@ -1220,21 +1235,35 @@ select {
   text-decoration: none;
 }
 
+.page-meta-block .tag-link,
 .page-meta-line .tag-link {
   color: var(--edge-hot);
   pointer-events: auto;
+
+  &:hover {
+    color: var(--edge-hot-bright);
+  }
 }
 
-
+.page-meta-block .page-date,
+.page-meta-block .content-meta > span,
 .page-meta-line .page-date,
-.page-meta-line .content-meta>span {
-  color: var(--text-main);
+.page-meta-line .content-meta > span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
 }
 
-.page-meta-line .tag-link:hover {
-  color: var(--edge-hot-bright);
+.page-meta-block .meta-separator {
+  color: var(--edge-soft);
+  opacity: 0.7;
+  font-size: 0.75rem;
+  user-select: none;
+  margin: 0 0.1rem;
 }
 
+.page-meta-block .page-date,
+.page-meta-block .page-reading-meta,
+.page-meta-block .content-meta,
 .page-meta-line .page-date,
 .page-meta-line .page-reading-meta,
 .page-meta-line .content-meta {
@@ -1243,10 +1272,12 @@ select {
   margin: 0;
 }
 
+.page-meta-block .page-reading-meta,
 .page-meta-line .page-reading-meta {
   flex: 0 0 auto;
 }
 
+.page-meta-block .content-meta,
 .page-meta-line .content-meta {
   display: inline-flex;
   flex-wrap: nowrap;
@@ -1254,6 +1285,7 @@ select {
   color: inherit;
 }
 
+.page-meta-block .content-meta time,
 .page-meta-line .content-meta time {
   display: none;
 }
@@ -1262,7 +1294,7 @@ select {
   margin-top: 2rem;
 }
 
-.home-recent-notes>h2 {
+.home-recent-notes > h2 {
   margin: 0 0 1rem;
   color: var(--text-main);
   font-size: 1.15rem;
@@ -1355,7 +1387,7 @@ select {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  margin: 0 0 1.6rem;
+  margin: 3.5rem 0 1.6rem;
   font-size: 0.8rem;
   letter-spacing: 0.02em;
   text-align: center;
@@ -1378,11 +1410,11 @@ select {
 
 .explorer,
 .explorer button,
-.explorer .folder-container div>button,
-.explorer .folder-container div>button span,
-.explorer .folder-container div>a,
+.explorer .folder-container div > button,
+.explorer .folder-container div > button span,
+.explorer .folder-container div > a,
 .explorer .folder-icon,
-.explorer .explorer-content ul li>a {
+.explorer .explorer-content ul li > a {
   color: var(--text-muted);
 }
 
@@ -1402,7 +1434,7 @@ select {
   min-height: 0;
 }
 
-.explorer:not(.collapsed)>.explorer-content,
+.explorer:not(.collapsed) > .explorer-content,
 .explorer .explorer-content {
   visibility: visible;
   display: block;
@@ -1413,12 +1445,12 @@ select {
   transform: none;
 }
 
-.explorer.collapsed>.explorer-content {
+.explorer.collapsed > .explorer-content {
   visibility: hidden;
   display: none;
 }
 
-.explorer .explorer-content .folder-outer>ul {
+.explorer .explorer-content .folder-outer > ul {
   // upstream clips this list while the 0fr→1fr collapse animation runs; the
   // right padding keeps the sheared plate corners inside the clip instead of
   // getting sliced off vertically
@@ -1433,9 +1465,9 @@ select {
   text-transform: uppercase;
 }
 
-.explorer .explorer-content ul li>a,
-.explorer .folder-container div>a,
-.explorer .folder-container div>button span {
+.explorer .explorer-content ul li > a,
+.explorer .folder-container div > a,
+.explorer .folder-container div > button span {
   transition:
     color 0.18s ease,
     opacity 0.18s ease;
@@ -1450,21 +1482,21 @@ select {
     transform 0.3s ease;
 }
 
-.explorer .explorer-content ul li>a:hover,
-.explorer .folder-container div>a:hover,
-.explorer .folder-container div>button:hover span,
+.explorer .explorer-content ul li > a:hover,
+.explorer .folder-container div > a:hover,
+.explorer .folder-container div > button:hover span,
 .explorer .folder-container:hover .folder-icon {
   color: var(--text-main);
   opacity: 1;
 }
 
-.explorer .explorer-content ul li>a.active,
-.explorer .explorer-content ul li>a[aria-current="page"] {
+.explorer .explorer-content ul li > a.active,
+.explorer .explorer-content ul li > a[aria-current="page"] {
   color: var(--secondary);
   opacity: 1;
 }
 
-.explorer .explorer-content .folder-outer>ul {
+.explorer .explorer-content .folder-outer > ul {
   border-left-color: var(--edge-line);
 }
 
@@ -1480,26 +1512,26 @@ select {
   overflow: hidden;
 }
 
-.page>#quartz-body .sidebar.right :where(.toc, .graph, .desktop-only, h3, button, ul, li, a, p) {
+.page > #quartz-body .sidebar.right :where(.toc, .graph, .desktop-only, h3, button, ul, li, a, p) {
   box-sizing: border-box;
   max-width: 100%;
   min-width: 0;
 }
 
-.page>#quartz-body .sidebar.right :where(h3, a, p, button) {
+.page > #quartz-body .sidebar.right :where(h3, a, p, button) {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-.page>#quartz-body .sidebar.right :where(.graph, .graph-outer, .graph-container) {
+.page > #quartz-body .sidebar.right :where(.graph, .graph-outer, .graph-container) {
   overflow: hidden;
 }
 
-.page>#quartz-body .sidebar.right .graph>.graph-outer {
+.page > #quartz-body .sidebar.right .graph > .graph-outer {
   max-width: 100%;
 }
 
-.page>#quartz-body .sidebar.right .graph>.graph-outer>.graph-container {
+.page > #quartz-body .sidebar.right .graph > .graph-outer > .graph-container {
   width: calc(100% + var(--right-content-safe-pad) * 2);
   max-width: none;
   margin-left: calc(var(--right-content-safe-pad) * -1);
@@ -1507,7 +1539,7 @@ select {
   transform-origin: center;
 }
 
-.page>#quartz-body .sidebar.right .graph>.graph-outer>.graph-container>canvas {
+.page > #quartz-body .sidebar.right .graph > .graph-outer > .graph-container > canvas {
   display: block;
   max-width: 100%;
 }
@@ -1519,7 +1551,7 @@ select {
   overflow-wrap: anywhere;
 }
 
-ul.toc-content.overflow>li>a {
+ul.toc-content.overflow > li > a {
   box-sizing: border-box;
   max-width: 100%;
   color: var(--text-soft);
@@ -1528,12 +1560,12 @@ ul.toc-content.overflow>li>a {
   white-space: normal;
 }
 
-ul.toc-content.overflow>li>a:hover {
+ul.toc-content.overflow > li > a:hover {
   color: var(--text-main);
 }
 
-ul.toc-content.overflow>li>a.in-view,
-ul.toc-content.overflow>li>a[aria-current="true"] {
+ul.toc-content.overflow > li > a.in-view,
+ul.toc-content.overflow > li > a[aria-current="true"] {
   color: var(--secondary);
   opacity: 1;
 }
@@ -1545,7 +1577,7 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
 // to out-rank `.page>#quartz-body .sidebar>*`, whose transition list would
 // otherwise swallow the grid-rows one (and whose opacity/transform entries
 // are mirrored here so the sidebar collapse fade keeps working).
-.page>#quartz-body .sidebar .toc {
+.page > #quartz-body .sidebar .toc {
   display: grid;
   grid-template-rows: auto 1fr;
   transition:
@@ -1554,12 +1586,12 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     transform 0.28s var(--chrome-ease);
 }
 
-.page>#quartz-body .sidebar .toc:has(> button.toc-header.collapsed) {
+.page > #quartz-body .sidebar .toc:has(> button.toc-header.collapsed) {
   flex: 0 0.5 auto;
   grid-template-rows: auto 0fr;
 }
 
-.page>#quartz-body .sidebar ul.toc-content.overflow {
+.page > #quartz-body .sidebar ul.toc-content.overflow {
   min-height: 0;
   // clips the rows while the track collapses; also keeps the row plates'
   // right-edge poke from ever turning into a horizontal scrollbar
@@ -1571,7 +1603,7 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     opacity 0.26s ease;
 }
 
-.page>#quartz-body .sidebar .toc:has(> button.toc-header.collapsed) ul.toc-content.overflow {
+.page > #quartz-body .sidebar .toc:has(> button.toc-header.collapsed) ul.toc-content.overflow {
   margin-top: 0;
   margin-bottom: 0;
   // its padding would otherwise keep a few px of track height alive
@@ -1593,13 +1625,13 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
 // ---------------------------------------------------------------------------
 @media all and (min-width: #{map.get($breakpoints, desktop)}) {
   .explorer .explorer-content .tree-item-self,
-  ul.toc-content.overflow>li>a {
+  ul.toc-content.overflow > li > a {
     position: relative;
     z-index: 0;
   }
 
   .explorer .explorer-content .tree-item-self::before,
-  ul.toc-content.overflow>li>a::before {
+  ul.toc-content.overflow > li > a::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -1621,13 +1653,13 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
   // hover pops the slab toward the viewer (positive Z grows it slightly and
   // lifts the shadow); pressing drops it back below its rest depth
   .explorer .explorer-content .tree-item-self:hover::before,
-  ul.toc-content.overflow>li>a:hover::before {
+  ul.toc-content.overflow > li > a:hover::before {
     --plate-z: 18px;
     --plate-shadow: 0.3rem 0.22rem 0 rgba(0, 0, 0, 0.6);
   }
 
   .explorer .explorer-content .tree-item-self:active::before,
-  ul.toc-content.overflow>li>a:active::before {
+  ul.toc-content.overflow > li > a:active::before {
     --plate-z: -10px;
     --plate-shadow: 0.04rem 0.03rem 0 rgba(0, 0, 0, 0.4);
   }
@@ -1635,16 +1667,16 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
   // hover/current overrides are set on the pseudo-element itself so they beat
   // the inherited per-depth custom properties below
   .explorer .explorer-content .tree-item-self:hover::before,
-  .explorer .explorer-content ul li>a.active::before,
-  .explorer .explorer-content ul li>a[aria-current="page"]::before,
-  ul.toc-content.overflow>li>a:hover::before {
+  .explorer .explorer-content ul li > a.active::before,
+  .explorer .explorer-content ul li > a[aria-current="page"]::before,
+  ul.toc-content.overflow > li > a:hover::before {
     --plate-fill: rgba(159, 220, 255, 0.08);
     --plate-edge: rgba(159, 220, 255, 0.4);
   }
 
   // explorer rows: depth follows UL nesting depth; nearer plates cast the
   // bigger hard shadow
-  .explorer .explorer-content ul li>.tree-item-self {
+  .explorer .explorer-content ul li > .tree-item-self {
     --plate-skew: -12deg;
     --plate-z: 0px;
     --plate-fill: rgba(255, 255, 255, 0.05);
@@ -1652,21 +1684,21 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     --plate-shadow: 0.16rem 0.12rem 0 rgba(0, 0, 0, 0.55);
   }
 
-  .explorer .explorer-content ul ul li>.tree-item-self {
+  .explorer .explorer-content ul ul li > .tree-item-self {
     --plate-z: -16px;
     --plate-fill: rgba(255, 255, 255, 0.032);
     --plate-edge: rgba(255, 255, 255, 0.075);
     --plate-shadow: 0.12rem 0.09rem 0 rgba(0, 0, 0, 0.5);
   }
 
-  .explorer .explorer-content ul ul ul li>.tree-item-self {
+  .explorer .explorer-content ul ul ul li > .tree-item-self {
     --plate-z: -30px;
     --plate-fill: rgba(255, 255, 255, 0.02);
     --plate-edge: rgba(255, 255, 255, 0.06);
     --plate-shadow: 0.08rem 0.06rem 0 rgba(0, 0, 0, 0.45);
   }
 
-  .explorer .explorer-content ul ul ul ul li>.tree-item-self {
+  .explorer .explorer-content ul ul ul ul li > .tree-item-self {
     --plate-z: -42px;
     --plate-fill: rgba(255, 255, 255, 0.012);
     --plate-edge: rgba(255, 255, 255, 0.045);
@@ -1674,7 +1706,7 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
   }
 
   // rows need real padding so the plate frames the text instead of hugging it
-  .explorer .explorer-content ul li>a.tree-item-self {
+  .explorer .explorer-content ul li > a.tree-item-self {
     display: block;
     padding: 0.26rem 0.65rem;
   }
@@ -1701,7 +1733,7 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     padding-right: 0.4rem;
   }
 
-  ul.toc-content.overflow>li>a {
+  ul.toc-content.overflow > li > a {
     --plate-skew: 0deg;
     --plate-z: 0px;
     --plate-fill: rgba(255, 255, 255, 0.045);
@@ -1712,17 +1744,17 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
     margin: 0 0 3px;
   }
 
-  ul.toc-content.overflow>li.depth-2>a {
+  ul.toc-content.overflow > li.depth-2 > a {
     --plate-z: -16px;
     --plate-fill: rgba(255, 255, 255, 0.028);
     --plate-edge: rgba(255, 255, 255, 0.07);
     --plate-shadow: 0.1rem 0.08rem 0 rgba(0, 0, 0, 0.5);
   }
 
-  ul.toc-content.overflow>li.depth-3>a,
-  ul.toc-content.overflow>li.depth-4>a,
-  ul.toc-content.overflow>li.depth-5>a,
-  ul.toc-content.overflow>li.depth-6>a {
+  ul.toc-content.overflow > li.depth-3 > a,
+  ul.toc-content.overflow > li.depth-4 > a,
+  ul.toc-content.overflow > li.depth-5 > a,
+  ul.toc-content.overflow > li.depth-6 > a {
     --plate-z: -30px;
     --plate-fill: rgba(255, 255, 255, 0.016);
     --plate-edge: rgba(255, 255, 255, 0.055);
@@ -1733,14 +1765,13 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
   // carries the -12° shear, so an unskewed pseudo-element of its own paints a
   // parallelogram backplate while the bar/results stay counter-sheared (their
   // text reads upright). The hard extrusion shadow matches the sidebar plates.
-  .search>.search-container>.search-space::before {
+  .search > .search-container > .search-space::before {
     content: "";
     position: absolute;
     inset: -1rem -1.4rem;
     z-index: -1;
     background:
-      linear-gradient(90deg, rgba(159, 220, 255, 0.045), transparent 40%),
-      var(--bg-panel);
+      linear-gradient(90deg, rgba(159, 220, 255, 0.045), transparent 40%), var(--bg-panel);
     border: 1px solid var(--edge-line);
     box-shadow: 0.3rem 0.2rem 0 rgba(0, 0, 0, 0.35);
     pointer-events: none;
@@ -1751,32 +1782,32 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
   // cards re-square themselves so they stay readable. The fixed +12° on the
   // cards composes with the parent's animated angle, so they ride the
   // open/close transition seamlessly.
-  .search>.search-container>.search-space>.search-bar,
-  .search>.search-container>.search-space>.search-layout,
-  .search>.search-container>.search-space>.ghost-text {
+  .search > .search-container > .search-space > .search-bar,
+  .search > .search-container > .search-space > .search-layout,
+  .search > .search-container > .search-space > .ghost-text {
     transform: none;
   }
 
-  .search>.search-container>.search-space .result-card,
-  .search>.search-container>.search-space .tag-suggestions {
+  .search > .search-container > .search-space .result-card,
+  .search > .search-container > .search-space .tag-suggestions {
     transform: skewX(12deg);
     transform-origin: top left;
   }
 
   // the preview pane leans with the plate; hide its vertical scrollbar (the
   // wheel still scrolls) so no bar crosses the sheared column
-  .search>.search-container>.search-space .preview-container {
+  .search > .search-container > .search-space .preview-container {
     scrollbar-width: none;
   }
 
-  .search>.search-container>.search-space .preview-container::-webkit-scrollbar {
+  .search > .search-container > .search-space .preview-container::-webkit-scrollbar {
     display: none;
   }
 
   // counter-sheared card corners poke past the list box; clip the x axis so
   // the list keeps its vertical scroll without spawning a horizontal bar,
   // and pad the sides so nothing actually overflows the clip
-  .search>.search-container>.search-space .results-container {
+  .search > .search-container > .search-space .results-container {
     box-sizing: border-box;
     overflow-x: clip;
     padding-left: 0.55rem;
@@ -1784,25 +1815,33 @@ ul.toc-content.overflow>li>a[aria-current="true"] {
   }
 
   // opening/closing is the popup swinging into the sheared silhouette: it
-  // rotates up around its top edge (rotateX) while shearing 0 -> -12°, and a
-  // slight overshoot in the ease lands the swing with a bounce instead of a
-  // dead float
-  .search>.search-container>.search-space {
-    transform: perspective(1100px) rotateX(-10deg) skewX(0deg) translateY(0.9rem);
-    // the fade must outlast the swing, or the container turning invisible
-    // would cut off the tail of the close animation
+  // shears from 0° to -12° on popup, and plays the reverse animation on close
+  .search > .search-container > .search-space {
+    transform: translateY(0.8rem) skewX(0deg);
+    transform-origin: top center;
+    opacity: 0;
     transition:
-      opacity 0.4s var(--chrome-ease),
-      transform 0.4s cubic-bezier(0.22, 0.9, 0.28, 1.08);
+      opacity 0.28s ease,
+      transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
-  .search>.search-container.active>.search-space {
-    transform: perspective(1100px) rotateX(0deg) skewX(-12deg) translateY(0);
+  .search > .search-container.active > .search-space {
+    transform: translateY(0) skewX(-12deg);
+    opacity: 1;
+    transition:
+      opacity 0.22s ease,
+      transform 0.35s cubic-bezier(0.18, 0.9, 0.26, 1.08);
   }
 
-  .search>.search-container {
+  .search > .search-container {
     transition:
-      opacity 0.26s var(--chrome-ease),
-      visibility 0s linear 0.42s;
+      opacity 0.28s ease,
+      visibility 0s linear 0.32s;
+  }
+
+  .search > .search-container.active {
+    transition:
+      opacity 0.22s ease,
+      visibility 0s linear;
   }
 }

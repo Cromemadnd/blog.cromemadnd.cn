@@ -304,9 +304,7 @@ export const DefaultFrame: PageFrame = {
       }
     }
 
-    const hasComments = afterBody.some(
-      (BodyComponent) => BodyComponent.displayName === "Comments",
-    )
+    const hasComments = afterBody.some((BodyComponent) => BodyComponent.displayName === "Comments")
     const mobileNav = i18n(componentData.cfg.locale ?? "en-US").components.mobileNav
     const MobileNavIcon = ({ children }: { children: JSX.Element }) => (
       <svg
@@ -333,81 +331,93 @@ export const DefaultFrame: PageFrame = {
           ))}
         </div>
         <div class="page-header">
-            <a
-              class="site-brand"
-              href={joinSegments(baseDir, "/")}
-              aria-label={componentData.cfg.pageTitle}
-            >
-              <img src={iconPath} alt="" aria-hidden="true" />
-              <span>{componentData.cfg.pageTitle}</span>
-            </a>
-            <Header {...componentData}>
-              {header.map((HeaderComponent) => (
-                <HeaderComponent {...componentData} />
-              ))}
-            </Header>
-            <div class="page-header-actions">
-              <div class="toolbar-actions">
-                <button
-                  type="button"
-                  class="sidebar-toggle left-sidebar-toggle"
-                  data-sidebar="left"
-                  aria-pressed="false"
-                  {...sidebarToggleLabels("left")}
-                >
-                  <SidebarToggleIcon side="left" />
-                </button>
-                {toolbar.map((BodyComponent) => (
-                  <BodyComponent {...componentData} />
-                ))}
-                <button
-                  type="button"
-                  class="sidebar-toggle right-sidebar-toggle"
-                  data-sidebar="right"
-                  aria-pressed="false"
-                  {...sidebarToggleLabels("right")}
-                >
-                  <SidebarToggleIcon side="right" />
-                </button>
-              </div>
-            </div>
-        </div>
-        <div class="center">
-            <div class="page-header-main">
-              {headerContent.map((BodyComponent) => (
+          <a
+            class="site-brand"
+            href={joinSegments(baseDir, "/")}
+            aria-label={componentData.cfg.pageTitle}
+          >
+            <img src={iconPath} alt="" aria-hidden="true" />
+            <span>{componentData.cfg.pageTitle}</span>
+          </a>
+          <Header {...componentData}>
+            {header.map((HeaderComponent) => (
+              <HeaderComponent {...componentData} />
+            ))}
+          </Header>
+          <div class="page-header-actions">
+            <div class="toolbar-actions">
+              <button
+                type="button"
+                class="sidebar-toggle left-sidebar-toggle"
+                data-sidebar="left"
+                aria-pressed="false"
+                {...sidebarToggleLabels("left")}
+              >
+                <SidebarToggleIcon side="left" />
+              </button>
+              {toolbar.map((BodyComponent) => (
                 <BodyComponent {...componentData} />
               ))}
-              {!isIndex && (Array.isArray(tags) && tags.length > 0 ? true : date !== undefined) ? (
-                <div class="page-meta-line">
-                  {Array.isArray(tags) && tags.length > 0 ? (
-                    <div class="page-tags">
-                      {tags.map((tag) => (
-                        <a
-                          class="internal tag-link"
-                          href={resolveRelative(
-                            componentData.fileData.slug!,
-                            `tags/${tag}` as FullSlug,
-                          )}
-                        >
-                          {tag}
-                        </a>
-                      ))}
-                    </div>
-                  ) : null}
-                  {date ? (
-                    <span class="page-date">
-                      <time dateTime={date.toISOString()}>{formatNumericDate(date)}</time>
-                    </span>
-                  ) : null}
-                  {contentMeta.length > 0 ? (
-                    <div class="page-reading-meta">
-                      {contentMeta.map((BodyComponent) => (
-                        <BodyComponent {...componentData} />
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
+              <button
+                type="button"
+                class="sidebar-toggle right-sidebar-toggle"
+                data-sidebar="right"
+                aria-pressed="false"
+                {...sidebarToggleLabels("right")}
+              >
+                <SidebarToggleIcon side="right" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="center">
+          <div class="page-header-main">
+            {headerContent.map((BodyComponent) => (
+              <BodyComponent {...componentData} />
+            ))}
+            {!isIndex &&
+            ((Array.isArray(tags) && tags.length > 0) ||
+              date !== undefined ||
+              contentMeta.length > 0) ? (
+              <div class="page-meta-block">
+                {Array.isArray(tags) && tags.length > 0 ? (
+                  <div class="page-tags">
+                    {tags.map((tag) => (
+                      <a
+                        class="internal tag-link"
+                        href={resolveRelative(
+                          componentData.fileData.slug!,
+                          `tags/${tag}` as FullSlug,
+                        )}
+                      >
+                        {tag}
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
+                {date || contentMeta.length > 0 ? (
+                  <div class="page-date-meta">
+                    {date ? (
+                      <span class="page-date">
+                        <time dateTime={date.toISOString()}>{formatNumericDate(date)}</time>
+                      </span>
+                    ) : null}
+                    {date && contentMeta.length > 0 ? (
+                      <span class="meta-separator" aria-hidden="true">
+                        |
+                      </span>
+                    ) : null}
+                    {contentMeta.length > 0 ? (
+                      <div class="page-reading-meta">
+                        {contentMeta.map((BodyComponent) => (
+                          <BodyComponent {...componentData} />
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
           <Content {...componentData} />
           {isIndex && (
@@ -421,24 +431,35 @@ export const DefaultFrame: PageFrame = {
               })}
             </section>
           )}
+          <div class="footer-copyright">
+            <p>
+              Copyright 2026{" "}
+              <a href={resolveRelative(componentData.fileData.slug!, "about" as FullSlug)}>
+                Cromemadnd
+              </a>
+              .
+            </p>
+            <p>
+              This work is licensed under{" "}
+              <a
+                href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh-hans"
+                target="_blank"
+                rel="noopener"
+              >
+                CC BY-NC 4.0
+              </a>
+              .
+            </p>
+            <p>
+              Built with{" "}
+              <a href="https://quartz.jzhao.xyz/" target="_blank" rel="noopener">
+                Quartz
+              </a>{" "}
+              v5.0.0 © 2026.
+            </p>
+          </div>
           <hr />
           <div class="page-footer">
-            <div class="footer-copyright">
-              <p>
-                Copyright{" "}
-                <a href={resolveRelative(componentData.fileData.slug!, "about" as FullSlug)}>
-                  Cromemadnd
-                </a>{" "}
-                2026. All rights reserved
-              </p>
-              <p>
-                Built with{" "}
-                <a href="https://quartz.jzhao.xyz/" target="_blank" rel="noopener">
-                  Quartz
-                </a>{" "}
-                v5.0.0 © 2026
-              </p>
-            </div>
             {afterBody.map((BodyComponent) => (
               <BodyComponent {...componentData} />
             ))}

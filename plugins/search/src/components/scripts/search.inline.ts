@@ -283,13 +283,18 @@ async function setupSearch() {
       container.classList.remove("active");
       if (sidebar) sidebar.style.zIndex = "";
       searchButton.setAttribute("aria-expanded", "false");
-      searchBar.value = "";
-      removeAllChildren(results!);
-      if (preview) removeAllChildren(preview);
-      searchLayout.classList.remove("display-results");
-      searchType = "basic";
-      currentHover = null;
-      hideTagDropdown();
+      searchBar.blur();
+      setTimeout(() => {
+        if (!container.classList.contains("active")) {
+          searchBar.value = "";
+          removeAllChildren(results!);
+          if (preview) removeAllChildren(preview);
+          searchLayout.classList.remove("display-results");
+          searchType = "basic";
+          currentHover = null;
+          hideTagDropdown();
+        }
+      }, 350);
       searchButton.focus();
     };
 
