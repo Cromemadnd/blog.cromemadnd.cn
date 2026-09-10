@@ -204,22 +204,52 @@ const sidebarToggleScript = `
     }
   })
 
-  // Arknights-style depth: the background layers sit at different distances,
-  // so they drift with the pointer at layer-dependent rates (CSS translates
-  // the plates via --par-x/--par-y; foreground content stays put). rAF-throttled.
-  const parallaxQuery = window.matchMedia(
-    "(min-width: 1200px) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
-  )
-  let parallaxRaf = 0
-  window.addEventListener("mousemove", (event) => {
-    if (!parallaxQuery.matches || parallaxRaf) return
-    parallaxRaf = requestAnimationFrame(() => {
-      parallaxRaf = 0
-      const el = (document.getElementById("quartz-root") ?? document.documentElement).style
-      el.setProperty("--par-x", (event.clientX / window.innerWidth - 0.5).toFixed(4))
-      el.setProperty("--par-y", (event.clientY / window.innerHeight - 0.5).toFixed(4))
-    })
+  // Dynamically index visible explorer items so their width adapts
+  // to the -12° sheared background plate and their depth nesting level.
+  const updateExplorerItemIndices = () => {
+    const explorer = document.querySelector(".explorer-content .explorer-ul")
+    if (!explorer) return
+    const items = explorer.querySelectorAll(".tree-item-self")
+    let visibleIndex = 0
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      if (item.offsetParent !== null) {
+        item.style.setProperty("--item-index", String(visibleIndex++))
+      }
+    }
+  }
+
+  document.addEventListener("nav", () => {
+    setTimeout(updateExplorerItemIndices, 50)
   })
+
+  let explorerObserver = null
+  const observeExplorer = () => {
+    const explorerUl = document.querySelector(".explorer-content .explorer-ul")
+    if (!explorerUl || explorerObserver) return
+    explorerObserver = new MutationObserver(() => {
+      updateExplorerItemIndices()
+    })
+    explorerObserver.observe(explorerUl, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    })
+  }
+
+  document.addEventListener("click", (e) => {
+    if (e.target && e.target.closest(".folder-container, .folder-button, .folder-icon")) {
+      requestAnimationFrame(updateExplorerItemIndices)
+      setTimeout(updateExplorerItemIndices, 100)
+      setTimeout(updateExplorerItemIndices, 320)
+    }
+  })
+
+  setTimeout(() => {
+    observeExplorer()
+    updateExplorerItemIndices()
+  }, 0)
 })()
 `
 

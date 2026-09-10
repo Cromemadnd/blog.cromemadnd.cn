@@ -96,9 +96,6 @@ body {
   z-index: var(--layer-body-bg);
   pointer-events: none;
   transform: skewX(-12deg);
-  // deepest layer: largest parallax drift, opposite the pointer
-  translate: calc(var(--par-x) * -14px) calc(var(--par-y) * -9px);
-  transition: translate 0.3s var(--chrome-ease);
   transform-origin: center;
   overflow: hidden;
   isolation: isolate;
@@ -270,9 +267,6 @@ select {
     pointer-events: none;
     transform: skewX(-12deg);
     transform-origin: top left;
-    // mid-depth layer: gentle pointer drift; `translate` (not transform) so
-    // the collapsed-state transform override never fights the parallax
-    translate: calc(var(--par-x) * 9px) calc(var(--par-y) * 5px);
     background:
       linear-gradient(90deg, rgba(255, 255, 255, 0.035), transparent 42%), var(--bg-panel);
     border-right: 1px solid var(--edge-soft);
@@ -281,8 +275,7 @@ select {
     box-shadow: 0.3rem 0.2rem 0 rgba(0, 0, 0, 0.35);
     transition:
       opacity 0.28s var(--chrome-ease),
-      transform 0.32s var(--chrome-ease),
-      translate 0.3s var(--chrome-ease);
+      transform 0.32s var(--chrome-ease);
   }
 
   .page-header-bg {
@@ -291,12 +284,10 @@ select {
     z-index: var(--layer-page-header-bg);
     height: var(--topbar-height);
     pointer-events: none;
-    translate: calc(var(--par-x) * 4px) calc(var(--par-y) * 2px);
     background: rgba(10, 10, 10, 0.6);
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     backdrop-filter: blur(6px);
     box-shadow: 0 0.22rem 0 rgba(0, 0, 0, 0.35);
-    transition: translate 0.3s var(--chrome-ease);
   }
 
   .right-sidebar-bg {
@@ -309,15 +300,13 @@ select {
     pointer-events: none;
     transform: skewX(-12deg);
     transform-origin: bottom right;
-    translate: calc(var(--par-x) * 6px) calc(var(--par-y) * 3px);
     background:
       linear-gradient(270deg, rgba(255, 255, 255, 0.035), transparent 48%), rgba(10, 10, 10, 0.76);
     border-left: 1px solid var(--edge-soft);
     box-shadow: -0.3rem 0.2rem 0 rgba(0, 0, 0, 0.4);
     transition:
       opacity 0.28s var(--chrome-ease),
-      transform 0.32s var(--chrome-ease),
-      translate 0.3s var(--chrome-ease);
+      transform 0.32s var(--chrome-ease);
   }
 
   .page > #quartz-body .sidebar {
@@ -359,15 +348,13 @@ select {
     width: var(--left-cut-width);
     padding: calc(var(--topbar-height) + 1.5rem) clamp(2.25rem, 3vw, 3.6rem) 2rem
       clamp(1.5rem, 2vw, 2rem);
-    // the panel itself leans on real transform 3D: a self-contained perspective
-    // (no ancestor perspective, which would reparent the fixed sidebars) turns
-    // the inner edge toward the viewer, and the pointer nudges the lean angle
-    transform: perspective(1600px) rotateY(calc(2deg - var(--par-x) * 1deg));
+    // 简化为只保留hover与否两种状态：静止时微倾，hover时回正
+    transform: perspective(1600px) rotateY(2deg);
     transform-origin: left center;
+    transition: transform 0.28s var(--chrome-ease);
 
     &:hover {
-      // the plate notices you and squares up a little, Arknights-style
-      transform: perspective(1600px) rotateY(calc(1deg - var(--par-x) * 1deg));
+      transform: perspective(1600px) rotateY(0.5deg);
     }
   }
 
@@ -380,13 +367,13 @@ select {
     width: var(--right-cut-bg-width);
     padding: calc(var(--topbar-height) + 2rem) var(--right-content-inline-pad) 2rem
       var(--right-content-inline-pad);
-    // mirrored lean: the content-side (left) edge swings toward the viewer;
-    // the skew stays in the chain so the -12° silhouette is preserved
-    transform: perspective(1600px) skewX(-12deg) rotateY(calc(-2deg + var(--par-x) * 1deg));
+    // 简化为只保留hover与否两种状态：静止时微向内切，hover时回正
+    transform: perspective(1600px) skewX(-12deg) rotateY(-2deg);
     transform-origin: bottom right;
+    transition: transform 0.28s var(--chrome-ease);
 
     &:hover {
-      transform: perspective(1600px) skewX(-12deg) rotateY(calc(-1deg + var(--par-x) * 1deg));
+      transform: perspective(1600px) skewX(-12deg) rotateY(-0.5deg);
     }
   }
 
@@ -1661,17 +1648,17 @@ ul.toc-content.overflow > li > a[aria-current="true"] {
       transform 0.18s var(--chrome-ease);
   }
 
-  // hover pops the slab toward the viewer (positive Z grows it slightly and
-  // lifts the shadow); pressing drops it back below its rest depth
+  // 简化卡片3D效果：只保留静止与hover两种状态
+  // 静止态统一为0px基底，hover时向前浮起16px并提升投影
   .explorer .explorer-content .tree-item-self:hover::before,
   ul.toc-content.overflow > li > a:hover::before {
-    --plate-z: 18px;
+    --plate-z: 16px;
     --plate-shadow: 0.3rem 0.22rem 0 rgba(0, 0, 0, 0.6);
   }
 
   .explorer .explorer-content .tree-item-self:active::before,
   ul.toc-content.overflow > li > a:active::before {
-    --plate-z: -10px;
+    --plate-z: -8px;
     --plate-shadow: 0.04rem 0.03rem 0 rgba(0, 0, 0, 0.4);
   }
 
@@ -1687,7 +1674,9 @@ ul.toc-content.overflow > li > a[aria-current="true"] {
 
   // explorer rows: depth follows UL nesting depth; nearer plates cast the
   // bigger hard shadow
+  // 左侧条目层级深度定义（--item-depth）
   .explorer .explorer-content ul li > .tree-item-self {
+    --item-depth: 0;
     --plate-skew: -12deg;
     --plate-z: 0px;
     --plate-fill: rgba(255, 255, 255, 0.05);
@@ -1696,26 +1685,78 @@ ul.toc-content.overflow > li > a[aria-current="true"] {
   }
 
   .explorer .explorer-content ul ul li > .tree-item-self {
-    --plate-z: -16px;
+    --item-depth: 1;
+    --plate-z: 0px;
     --plate-fill: rgba(255, 255, 255, 0.032);
     --plate-edge: rgba(255, 255, 255, 0.075);
-    --plate-shadow: 0.12rem 0.09rem 0 rgba(0, 0, 0, 0.5);
+    --plate-shadow: 0.14rem 0.1rem 0 rgba(0, 0, 0, 0.5);
   }
 
   .explorer .explorer-content ul ul ul li > .tree-item-self {
-    --plate-z: -30px;
+    --item-depth: 2;
+    --plate-z: 0px;
     --plate-fill: rgba(255, 255, 255, 0.02);
     --plate-edge: rgba(255, 255, 255, 0.06);
-    --plate-shadow: 0.08rem 0.06rem 0 rgba(0, 0, 0, 0.45);
+    --plate-shadow: 0.12rem 0.08rem 0 rgba(0, 0, 0, 0.45);
   }
 
   .explorer .explorer-content ul ul ul ul li > .tree-item-self {
-    --plate-z: -42px;
+    --item-depth: 3;
+    --plate-z: 0px;
     --plate-fill: rgba(255, 255, 255, 0.012);
     --plate-edge: rgba(255, 255, 255, 0.045);
-    --plate-shadow: 0.05rem 0.04rem 0 rgba(0, 0, 0, 0.4);
+    --plate-shadow: 0.1rem 0.07rem 0 rgba(0, 0, 0, 0.4);
   }
 
+  .explorer .explorer-content ul ul ul ul ul li > .tree-item-self {
+    --item-depth: 4;
+    --plate-z: 0px;
+    --plate-fill: rgba(255, 255, 255, 0.008);
+    --plate-edge: rgba(255, 255, 255, 0.035);
+    --plate-shadow: 0.08rem 0.05rem 0 rgba(0, 0, 0, 0.35);
+  }
+
+  // 左侧卡片宽度随层级 (--item-depth) 和纵向索引 (--item-index) 计算
+  // 随着纵向索引递增，背景板按 -12° 斜率向左收窄；随着层级深入，左侧缩进增加。
+  // 动态收减宽度可确保卡片右边缘严丝合缝匹配背景板轮廓，绝不溢出。
+  .explorer .explorer-content .tree-item-self {
+    box-sizing: border-box;
+    width: calc(100% - var(--item-depth, 0) * 1.15rem - var(--item-index, 0) * 0.42rem);
+    min-width: 9rem;
+    max-width: 100%;
+    transition: width 0.22s var(--chrome-ease);
+  }
+
+  .explorer .folder-container.tree-item-self {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .explorer .folder-container.tree-item-self > div {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .explorer .folder-container.tree-item-self .folder-title,
+  .explorer .explorer-content ul li > a.tree-item-self {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // 右侧 TOC 卡片同样统一为0px静止态
+  ul.toc-content.overflow > li > a,
+  ul.toc-content.overflow > li.depth-2 > a,
+  ul.toc-content.overflow > li.depth-3 > a,
+  ul.toc-content.overflow > li.depth-4 > a,
+  ul.toc-content.overflow > li.depth-5 > a,
+  ul.toc-content.overflow > li.depth-6 > a {
+    --plate-z: 0px;
+  }
   // rows need real padding so the plate frames the text instead of hugging it
   .explorer .explorer-content ul li > a.tree-item-self {
     display: block;
