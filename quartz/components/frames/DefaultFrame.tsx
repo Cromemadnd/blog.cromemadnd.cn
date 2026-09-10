@@ -207,13 +207,15 @@ const sidebarToggleScript = `
   // Arknights-style depth: the background layers sit at different distances,
   // so they drift with the pointer at layer-dependent rates (CSS translates
   // the plates via --par-x/--par-y; foreground content stays put). rAF-throttled.
-  const parallaxQuery = window.matchMedia("(min-width: 1200px) and (pointer: fine)")
+  const parallaxQuery = window.matchMedia(
+    "(min-width: 1200px) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+  )
   let parallaxRaf = 0
   window.addEventListener("mousemove", (event) => {
     if (!parallaxQuery.matches || parallaxRaf) return
     parallaxRaf = requestAnimationFrame(() => {
       parallaxRaf = 0
-      const el = document.documentElement.style
+      const el = (document.getElementById("quartz-root") ?? document.documentElement).style
       el.setProperty("--par-x", (event.clientX / window.innerWidth - 0.5).toFixed(4))
       el.setProperty("--par-y", (event.clientY / window.innerHeight - 0.5).toFixed(4))
     })
