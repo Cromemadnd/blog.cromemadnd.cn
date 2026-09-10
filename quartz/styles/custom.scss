@@ -1905,3 +1905,186 @@ ul.toc-content.overflow > li > a[aria-current="true"] {
       visibility 0s linear;
   }
 }
+
+// ---------------------------------------------------------------------------
+// 友情链接：四边形大卡片组件（Friend Link Quadrilateral Cards）
+// 明日方舟机能风设计：-12° 平行四边形大板 + 反倾斜圆形头像 + 科技切角 + Hover 3D 浮起
+// ---------------------------------------------------------------------------
+.friend-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2.2rem 2.6rem;
+  margin: 2.5rem 0 3rem;
+  padding: 0.5rem 0.6rem;
+  list-style: none !important;
+}
+
+.friend-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.35rem;
+  padding: 1.3rem 1.6rem;
+  text-decoration: none !important;
+  color: inherit !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)), var(--bg-panel);
+  border: 1px solid var(--edge-line);
+  box-shadow: 0.35rem 0.25rem 0 rgba(0, 0, 0, 0.45);
+  transform: skewX(-12deg);
+  transform-origin: center;
+  transition:
+    transform 0.24s var(--chrome-ease),
+    border-color 0.2s ease,
+    box-shadow 0.24s ease,
+    background-color 0.2s ease;
+  overflow: visible;
+
+  // 机能风右上角折角切线装饰
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid var(--edge-soft);
+    border-right: 2px solid var(--edge-soft);
+    transition: border-color 0.2s ease;
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: perspective(800px) translateZ(12px) skewX(-12deg) translateY(-2px);
+    border-color: var(--edge-hot);
+    box-shadow:
+      0.55rem 0.42rem 0 rgba(0, 0, 0, 0.65),
+      0 0 16px rgba(159, 220, 255, 0.12);
+    background:
+      linear-gradient(135deg, rgba(159, 220, 255, 0.08), rgba(255, 255, 255, 0.015)),
+      rgba(18, 22, 26, 0.95);
+
+    &::after {
+      border-color: var(--edge-hot);
+    }
+  }
+}
+
+// 卡片内部元素反向倾斜 12°，抵消卡片主体的 skewX(-12deg)，保持圆形头像与文字水平正向
+.friend-card-avatar,
+.friend-card-content {
+  transform: skewX(12deg);
+  transform-origin: center;
+}
+
+.friend-card-avatar {
+  position: relative;
+  width: 4.2rem;
+  height: 4.2rem;
+  min-width: 4.2rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--edge-soft);
+  background: var(--bg-code);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    border-color 0.22s ease,
+    transform 0.24s var(--chrome-ease);
+
+  img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    border-radius: 50% !important;
+    display: block;
+    margin: 0 !important;
+    min-height: unset !important;
+  }
+}
+
+.friend-card:hover .friend-card-avatar {
+  border-color: var(--edge-hot);
+  transform: skewX(12deg) scale(1.06);
+}
+
+.friend-card-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.friend-card-title {
+  font-family: var(--headerFont);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.friend-card:hover .friend-card-title {
+  color: var(--edge-hot);
+}
+
+.friend-card-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 0.45rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.friend-card-site {
+  font-family: var(--codeFont);
+  font-size: 0.78rem;
+  color: var(--secondary);
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.friend-card:hover .friend-card-site {
+  color: var(--edge-hot-bright);
+  opacity: 1;
+}
+
+@media all and (max-width: 768px) {
+  .friend-cards {
+    grid-template-columns: 1fr;
+    gap: 1.4rem;
+    padding: 0;
+  }
+
+  .friend-card {
+    padding: 1.1rem 1.3rem;
+    transform: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  .friend-card-avatar,
+  .friend-card-content {
+    transform: none;
+  }
+
+  .friend-card:hover .friend-card-avatar {
+    transform: scale(1.05);
+  }
+}
