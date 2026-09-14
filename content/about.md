@@ -30,13 +30,14 @@ draft:
 - 机器学习/自然语言处理领域：端侧小模型(SLM)、有状态模型、进化算法、仿生神经网络/流匹配
 - 游戏开发/计算机图形学
 - 嵌入式开发
-## 在代码之外%%
+## 在代码之外
+
+- 键盘(钢琴)/听歌/业余编曲？
+- %%
 
 ### 音乐类
 
-钢琴业余十级，偶尔会玩玩非常业余的编曲。
-
-喜欢的歌和歌手写在[这里](./diary/music/index) （希望能找到同好！）
+钢琴业余十级，偶尔会玩玩非常业余的编曲。喜欢的歌和歌手写在[这里](./diary/music/index)
 
 ### 单机类
 
@@ -49,8 +50,24 @@ draft:
 - 我的世界：故事模式（MCSM）
 - (还有很多买了没咋玩的没写上来)
 
+### 番剧类
+
+- 
+- 超时空辉夜姬
+- 
+
 ### 二游类
 
 - 明日方舟
 
 # 联系方式
+
+![Cromemadnd Lancity](https://1.gravatar.com/avatar/e801c203ddeeb28e71e17997de1b8a426f5bcfce2854570d8aa5bfa3e5d1ab89?s=256&d=initials)
+
+Cromemadnd Lancity
+
+Student, Chongqing University
+
+Liangjiang New District, Chongqing
+
+[gravatar.com/cromemadndlancity](https://gravatar.com/cromemadndlancity?utm_source=email_signature)

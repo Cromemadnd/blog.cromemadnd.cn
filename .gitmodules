@@ -1,0 +1,3 @@
+[submodule "content/secrets"]
+	path = content/secrets
+	url = git@github.com:Cromemadnd/secrets.blog.cromemadnd.cn.git
