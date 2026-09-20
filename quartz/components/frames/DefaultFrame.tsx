@@ -287,13 +287,22 @@ export const DefaultFrame: PageFrame = {
     )
     const recentFiles = componentData.allFiles.filter((file) => {
       const slug = file.slug
+      const isUnlisted =
+        Boolean(file && typeof file === "object" && "unlisted" in file && file.unlisted === true) ||
+        Boolean(
+          file?.frontmatter &&
+            typeof file.frontmatter === "object" &&
+            "unlisted" in file.frontmatter &&
+            file.frontmatter.unlisted === true,
+        )
       return (
         slug !== undefined &&
         slug !== "404" &&
         slug !== "index" &&
         slug !== "tags" &&
         !slug.startsWith("tags/") &&
-        !slug.endsWith("/index")
+        !slug.endsWith("/index") &&
+        !isUnlisted
       )
     })
     // double chevrons pointing at their sidebar: far more recognizable at

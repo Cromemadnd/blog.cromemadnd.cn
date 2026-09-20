@@ -6,7 +6,7 @@ date: 2026-09-10
 <div class="friend-cards">
   <a class="friend-card" href="https://tano.asia/" target="_blank" rel="noopener noreferrer">
     <div class="friend-card-avatar">
-      <img src="https://cdn.sep.cc/avatar/a565d4366d88a05a5fbf4d9f64a2b63e42133b7fe218c40fa62eeccfa8d1216f?v=1765490201000&size=256&d=initials" alt="朝花夕拾录" loading="lazy" referrerpolicy="no-referrer" />
+      <img src="https://cdn.sep.cc/avatar/a565d4366d88a05a5fbf4d9f64a2b63e42133b7fe218c40fa62eeccfa8d1216f?v=1765490201000&size=256&d=initials" loading="lazy" />
     </div>
     <div class="friend-card-content">
       <div class="friend-card-title">朝花夕拾录</div>
@@ -16,7 +16,7 @@ date: 2026-09-10
   </a>
   <a class="friend-card" href="https://dfzarutoria.icu/" target="_blank" rel="noopener noreferrer">
     <div class="friend-card-avatar">
-      <img src="./static/arutoria.jpg" alt="DFZArutoria" loading="lazy" referrerpolicy="no-referrer" />
+      <img src="./static/arutoria.jpg" loading="lazy" />
     </div>
     <div class="friend-card-content">
       <div class="friend-card-title">DFZArutoria</div>
@@ -26,12 +26,22 @@ date: 2026-09-10
   </a>
   <a class="friend-card" href="https://dfzarutoria.icu/" target="_blank" rel="noopener noreferrer">
     <div class="friend-card-avatar">
-      <img src="https://www.zouht.com/favicon.ico" alt="颢天 – ChrisKim's Blog" loading="lazy" />
+      <img src="https://www.zouht.com/favicon.ico" loading="lazy" />
     </div>
     <div class="friend-card-content">
       <div class="friend-card-title">颢天 – ChrisKim's Blog</div>
       <div class="friend-card-desc">Do not go gentle into that good night.</div>
       <div class="friend-card-site">zouht.com</div>
+    </div>
+  </a>
+  <a class="friend-card" href="https://blog.kaedeowo.top/" target="_blank" rel="noopener noreferrer">
+    <div class="friend-card-avatar">
+      <img src="https://minio.kaedeowo.top/kaede-blog/aurora/config/a4fa32e8f27c0fdd340636a20cb56413.png" loading="lazy" />
+    </div>
+    <div class="friend-card-content">
+      <div class="friend-card-title">Kaede的⑨肆</div>
+      <div class="friend-card-desc">8+1≠1+2＝⑨</div>
+      <div class="friend-card-site">blog.kaedeowo.top</div>
     </div>
   </a>
 </div>
