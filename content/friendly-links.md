@@ -24,7 +24,7 @@ date: 2026-09-10
       <div class="friend-card-site">dfzarutoria.icu</div>
     </div>
   </a>
-  <a class="friend-card" href="https://dfzarutoria.icu/" target="_blank" rel="noopener noreferrer">
+  <a class="friend-card" href="https://zouht.com/" target="_blank" rel="noopener noreferrer">
     <div class="friend-card-avatar">
       <img src="https://www.zouht.com/favicon.ico" loading="lazy" />
     </div>
