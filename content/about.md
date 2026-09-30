@@ -2,24 +2,13 @@
 title: 自我介绍
 date: 2026-09-06
 description: 我的自我介绍
-draft:
+draft: false
 ---
-中二病，喜欢<ruby>有趣的<rt>おもしろい</rt></ruby>东西。~~人生理想是造出电子猫娘。~~
+中二病，喜欢<ruby>有趣的<rt>おもしろい</rt></ruby>东西。
 
 网名/圈名/cn 是 <ruby>康明德<rt>Cromemadnd</rt></ruby>·<ruby>兰斯蒂<rt>Lancity</rt></ruby>, 你也可以叫我德<ruby>尔<rt>er</rt></ruby>/德子/kmd/cr一串字母之类任何你想叫的称呼！
 
 赛博生辰八字是INFP，具体来说是IN (0.7F/0.3T) (0.6P/0.4J)~~，可能每次去测的结果是以上四种之一~~。
-
-%%
-正确了又能证明什么？
-
-就算能从过去找出差错
-
-身世境遇不由人选择
-
-有理解 就足够
-
-盼日月 细水长流%%
 
 # 成分
 
@@ -37,7 +26,7 @@ draft:
 
 ### 音乐类
 
-钢琴业余十级，偶尔会玩玩非常业余的编曲。喜欢的歌和歌手写在[这里](./diary/music/index)
+钢琴业余十级，偶尔会玩玩非常业余的编曲。喜欢的歌曲和曲师/歌手写在[这里](./diary/music/index)。
 
 ### 单机类
 
@@ -50,24 +39,16 @@ draft:
 - 我的世界：故事模式（MCSM）
 - (还有很多买了没咋玩的没写上来)
 
-### 番剧类
-
-- 
-- 超时空辉夜姬
-- 
-
 ### 二游类
 
 - 明日方舟
 
 # 联系方式
 
-![Cromemadnd Lancity](https://1.gravatar.com/avatar/e801c203ddeeb28e71e17997de1b8a426f5bcfce2854570d8aa5bfa3e5d1ab89?s=256&d=initials)
+[Email: i@cromemadnd.cn](mailto://i@cromemadnd.cn)
 
-Cromemadnd Lancity
+[Github/Cromemadnd](https://github.com/Cromemadnd)
 
-Student, Chongqing University
+[QQ(小号致歉): 2438612243](https://qm.qq.com/q/UMiPGPPTiM)
 
-Liangjiang New District, Chongqing
-
-[gravatar.com/cromemadndlancity](https://gravatar.com/cromemadndlancity?utm_source=email_signature)
+[Gravatar](https://gravatar.com/cromemadndlancity)
