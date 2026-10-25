@@ -4,6 +4,7 @@ import { getDate } from "../Date"
 import { byDateAndAlphabetical, PageList } from "../PageList"
 import { FullSlug, joinSegments, pathToRoot, resolveRelative } from "../../util/path"
 import { i18n } from "../../i18n"
+import type { ComponentChildren } from "preact"
 
 const Header = HeaderConstructor()
 
@@ -291,9 +292,9 @@ export const DefaultFrame: PageFrame = {
         Boolean(file && typeof file === "object" && "unlisted" in file && file.unlisted === true) ||
         Boolean(
           file?.frontmatter &&
-            typeof file.frontmatter === "object" &&
-            "unlisted" in file.frontmatter &&
-            file.frontmatter.unlisted === true,
+          typeof file.frontmatter === "object" &&
+          "unlisted" in file.frontmatter &&
+          file.frontmatter.unlisted === true,
         )
       return (
         slug !== undefined &&
@@ -347,7 +348,7 @@ export const DefaultFrame: PageFrame = {
 
     const hasComments = afterBody.some((BodyComponent) => BodyComponent.displayName === "Comments")
     const mobileNav = i18n(componentData.cfg.locale ?? "en-US").components.mobileNav
-    const MobileNavIcon = ({ children }: { children: JSX.Element }) => (
+    const MobileNavIcon = ({ children }: { children: ComponentChildren }) => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"

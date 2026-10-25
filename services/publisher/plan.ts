@@ -18,7 +18,9 @@ export function changedPaths(
     .filter((key) => {
       const a = previous[key]
       const b = next[key]
-      return !a || !b || a.hash !== b.hash || a.mtimeMs !== b.mtimeMs || a.birthtimeMs !== b.birthtimeMs
+      return (
+        !a || !b || a.hash !== b.hash || a.mtimeMs !== b.mtimeMs || a.birthtimeMs !== b.birthtimeMs
+      )
     })
     .sort()
 }

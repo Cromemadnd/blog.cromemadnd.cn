@@ -23,6 +23,8 @@ export interface Translation {
   }
   direction?: "ltr" | "rtl"
   components: {
+    sidebar: { showLeft: string; hideLeft: string; showRight: string; hideRight: string }
+    mobileNav: { label: string; explorer: string; content: string; toc: string; comments: string }
     callout: CalloutTranslation
     backlinks: {
       title: string

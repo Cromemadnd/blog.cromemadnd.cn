@@ -17,7 +17,7 @@ import { resolveFrame } from "./frames"
 import type { TreeTransform } from "../plugins/types"
 import type { BuildCtx } from "../util/ctx"
 
-interface RenderComponents {
+export interface RenderComponents {
   head: QuartzComponent
   header: QuartzComponent[]
   beforeBody: QuartzComponent[]
@@ -297,6 +297,20 @@ export function renderTranscludes(
   walk(root)
 }
 
+/** Resolve all content transforms on Node before serializing a page artifact. */
+export function preparePageTree(
+  cfg: GlobalConfiguration,
+  slug: FullSlug,
+  componentData: QuartzComponentProps,
+  treeTransforms?: TreeTransform[],
+): Root {
+  const root = clone(componentData.tree) as Root
+  const visited = new Set<FullSlug>([slug])
+  renderTranscludes(root, cfg, slug, componentData, visited)
+  for (const transform of treeTransforms ?? []) transform(root, slug, componentData)
+  return root
+}
+
 export function renderPage(
   cfg: GlobalConfiguration,
   slug: FullSlug,
@@ -305,22 +319,18 @@ export function renderPage(
   pageResources: StaticResources,
   treeTransforms?: TreeTransform[],
 ): string {
-  // make a deep copy of the tree so we don't remove the transclusion references
-  // for the file cached in contentMap in build.ts
-  const root = clone(componentData.tree) as Root
-  const visited = new Set<FullSlug>([slug])
-  renderTranscludes(root, cfg, slug, componentData, visited)
+  componentData.tree = preparePageTree(cfg, slug, componentData, treeTransforms)
+  return renderDocument(cfg, slug, componentData, components, pageResources)
+}
 
-  // Run plugin-provided tree transforms (e.g. resolving inline bases codeblocks)
-  if (treeTransforms) {
-    for (const transform of treeTransforms) {
-      transform(root, slug, componentData)
-    }
-  }
-
-  // set componentData.tree to the edited html that has transclusions rendered
-  componentData.tree = root
-
+/** Pure document rendering; the Worker receives an already compiled body. */
+export function renderDocument(
+  cfg: GlobalConfiguration,
+  slug: FullSlug,
+  componentData: QuartzComponentProps,
+  components: RenderComponents,
+  pageResources: StaticResources,
+): string {
   const {
     head: Head,
     header,

@@ -13,3 +13,13 @@ replit.nix
 quartz/cli/tui/dist/
 
 .zcode/
+
+# Cloud publisher state, generated bundles and deployment credentials
+.cloud/
+.publisher/
+.publisher-dev/
+.env
+.env.*
+!.env.example
+deploy/livesync/config.json
+deploy/data/

@@ -15,7 +15,7 @@ function getPageTypes(ctx: BuildCtx): QuartzPageTypePluginInstance[] {
   return (ctx.cfg.plugins.pageTypes ?? []) as unknown as QuartzPageTypePluginInstance[]
 }
 
-function resolveLayout(
+export function resolveLayout(
   pageType: QuartzPageTypePluginInstance,
   sharedDefaults: Partial<FullPageLayout>,
   byPageType: Record<string, Partial<FullPageLayout>>,
@@ -112,7 +112,7 @@ async function emitPage(
  * populating both the ProcessedContent tree and vfile.data.htmlAst so that
  * transclusion (e.g. ![[file.canvas]]) can inline the virtual page's content.
  */
-function populateVirtualPageHtmlAst(
+export function populateVirtualPageHtmlAst(
   virtualEntries: Array<{
     tree: ProcessedContent[0]
     vfile: ProcessedContent[1]

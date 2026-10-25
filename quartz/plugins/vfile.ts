@@ -1,5 +1,5 @@
 import { Root as HtmlRoot } from "hast"
-import { Root as MdRoot } from "mdast"
+import { Root as MdRoot } from "remark-parse/lib"
 import { Data, VFile } from "vfile"
 
 export type QuartzPluginData = Data

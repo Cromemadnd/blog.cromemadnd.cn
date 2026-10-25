@@ -38,8 +38,10 @@ export class BuildState {
 
   dirty(filename: string): void {
     this.db
-      .prepare(`INSERT INTO dirty_files VALUES (?, 1)
-        ON CONFLICT(path) DO UPDATE SET generation = generation + 1`)
+      .prepare(
+        `INSERT INTO dirty_files VALUES (?, 1)
+        ON CONFLICT(path) DO UPDATE SET generation = generation + 1`,
+      )
       .run(filename)
   }
 
