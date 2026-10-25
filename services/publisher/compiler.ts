@@ -285,6 +285,18 @@ export class QuartzCompiler {
           slug: page.slug as FullSlug,
           relativePath: `${page.slug}.md` as FilePath,
           frontmatter: { title: page.title, tags: [] },
+          defaultDateType: "modified",
+          dates: {
+            created: new Date(
+              Math.max(...Object.values(input.files).map((file) => file.mtimeMs), 0),
+            ),
+            modified: new Date(
+              Math.max(...Object.values(input.files).map((file) => file.mtimeMs), 0),
+            ),
+            published: new Date(
+              Math.max(...Object.values(input.files).map((file) => file.mtimeMs), 0),
+            ),
+          },
           ...page.data,
         })
         virtual.push({
