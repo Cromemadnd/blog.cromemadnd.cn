@@ -1,0 +1,17 @@
+.git
+.*
+**/.*
+.quartz
+.cloud
+.publisher*
+.env
+.env.*
+node_modules
+**/node_modules
+content
+public
+prof
+deploy/data
+deploy/livesync/config.json
+**/*.sqlite*
+tsconfig.tsbuildinfo

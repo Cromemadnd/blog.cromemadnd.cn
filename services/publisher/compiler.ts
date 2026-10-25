@@ -6,7 +6,9 @@ import { render } from "preact-render-to-string"
 import { fromHtml } from "hast-util-from-html"
 import { visit } from "unist-util-visit"
 import type { Root, Element } from "hast"
-import cfg, { layout } from "../../quartz"
+import type { Root as MarkdownRoot } from "remark-parse/lib"
+import type { QuartzConfig } from "../../quartz/cfg"
+import { loadQuartzConfig, loadQuartzLayout } from "../../quartz/plugins/loader/config-loader"
 import { createMdProcessor, createHtmlProcessor } from "../../quartz/processors/parse"
 import { filterContent } from "../../quartz/processors/filter"
 import { getStaticResourcesFromPlugins } from "../../quartz/plugins"
@@ -52,6 +54,32 @@ interface CachedParse {
   tree: Root
   data: Record<string, unknown>
 }
+
+type CompilerConfiguration = {
+  cfg: QuartzConfig
+  layout: Awaited<ReturnType<typeof loadQuartzLayout>>
+}
+const configurations = new Map<boolean, Promise<CompilerConfiguration>>()
+function compilerConfiguration(skipOgImages: boolean): Promise<CompilerConfiguration> {
+  let result = configurations.get(skipOgImages)
+  if (!result) {
+    result = (async () => ({
+      cfg: await loadQuartzConfig(undefined, {
+        strict: true,
+        excludePlugins: skipOgImages ? ["og-image"] : [],
+      }),
+      layout: await loadQuartzLayout(),
+    }))()
+    configurations.set(skipOgImages, result)
+    result.catch(() => configurations.delete(skipOgImages))
+  }
+  return result
+}
+interface CachedMarkdown {
+  tree: MarkdownRoot
+  data: Record<string, unknown>
+  value: string
+}
 interface CachedEmitter {
   files: { path: string; ref: Awaited<ReturnType<ObjectStore["put"]>> }[]
   hashedResourceNames?: BuildCtx["hashedResourceNames"]
@@ -63,7 +91,13 @@ export interface BuildResult {
   release: Release
   snapshot: Snapshot
   dependencies: Dependency[]
-  stats: { parsed: number; bodies: number; reusedBodies: number; changed: string[] }
+  stats: {
+    parsed: number
+    transformed: number
+    bodies: number
+    reusedBodies: number
+    changed: string[]
+  }
 }
 
 /** Only the metadata used by page components crosses the publishing boundary. */
@@ -146,6 +180,7 @@ export class QuartzCompiler {
 
   async build(): Promise<BuildResult> {
     const { options, state, objects } = this
+    const { cfg, layout } = await compilerConfiguration(!!options.skipOgImages)
     const input = await snapshot(
       options.source,
       path.join(options.stateDirectory, "snapshots"),
@@ -222,17 +257,22 @@ export class QuartzCompiler {
       },
     }
     const md = createMdProcessor(ctx)
-    const html = createHtmlProcessor(ctx)
     let parsed = 0
+    let transformed = 0
     const content: ProcessedContent[] = []
+    const markdown: { key: string; tree: MarkdownRoot; file: VFile }[] = []
     for (const relativePath of allFiles.filter((name) => name.endsWith(".md"))) {
-      const cacheKey = `parse:${hash(stableJson({ mode, namespace, relativePath, source: input.files[relativePath] }))}`
-      const cached = state.cached<CachedParse>(cacheKey)
+      const cacheKey = `markdown:${hash(stableJson({ mode, namespace, relativePath, source: input.files[relativePath] }))}`
+      const cached = state.cached<CachedMarkdown>(cacheKey)
       const file = new VFile({ path: path.join(input.directory, relativePath) })
       if (cached) {
         file.data = revivePageData(cached.data)
         file.data.filePath = file.path as FilePath
-        content.push([cached.tree, file])
+        file.value = cached.value
+        // NoteProperties adds aliases to the shared namespace during its Markdown pass.
+        // Cached documents must replay that contribution before any HTML transforms run.
+        ctx.allSlugs.push(...((file.data.aliases as FullSlug[] | undefined) ?? []))
+        markdown.push({ key: cacheKey, tree: cached.tree, file })
         continue
       }
       file.value = (await fs.readFile(file.path, "utf8")).trim()
@@ -244,10 +284,30 @@ export class QuartzCompiler {
       }
       // Unlike the development parser, publishing fails closed on any transform error.
       const mdTree = await md.run(md.parse(file), file)
-      const tree = await html.run(mdTree, file)
-      state.cache(cacheKey, { tree, data: file.data })
-      content.push([tree, file])
+      state.cache(cacheKey, {
+        tree: mdTree,
+        data: compilationData(file.data),
+        value: file.value.toString(),
+      })
+      markdown.push({ key: cacheKey, tree: mdTree, file })
       parsed++
+    }
+    ctx.allSlugs.splice(0, ctx.allSlugs.length, ...new Set(ctx.allSlugs))
+    const resolvedNamespace = hash(stableJson(ctx.allSlugs))
+    const html = createHtmlProcessor(ctx)
+    for (const item of markdown) {
+      const cacheKey = `parse:${hash(stableJson({ markdown: item.key, resolvedNamespace }))}`
+      const cached = state.cached<CachedParse>(cacheKey)
+      if (cached) {
+        item.file.data = revivePageData(cached.data)
+        item.file.data.filePath = item.file.path as FilePath
+        content.push([cached.tree, item.file])
+      } else {
+        const tree = await html.run(structuredClone(item.tree), item.file)
+        state.cache(cacheKey, { tree, data: compilationData(item.file.data) })
+        content.push([tree, item.file])
+        transformed++
+      }
     }
     if (detectSlugCollisions(content).length)
       throw new Error("Duplicate article slugs; resolve collisions before publishing")
@@ -307,6 +367,17 @@ export class QuartzCompiler {
           layout: resolveLayout(pt, layout.defaults, layout.byPageType),
         })
         if (page.slug !== "404") ctx.virtualPages.push([tree, vfile])
+      }
+      if (pt.name === "CanvasPage" || pt.name === "BasesPage") {
+        for (const filename of allFiles.filter((name) =>
+          pt.fileExtensions?.some((ext) => name.endsWith(ext)),
+        )) {
+          if (!virtual.some((page) => page.vpSlug === slugifyFilePath(filename))) {
+            throw new Error(
+              `Cannot generate ${pt.name} for ${filename}; refusing to remove a possibly incomplete source page`,
+            )
+          }
+        }
       }
     }
     const withVirtual = [...published, ...ctx.virtualPages]
@@ -473,7 +544,7 @@ export class QuartzCompiler {
       release,
       snapshot: input,
       dependencies,
-      stats: { parsed, bodies, reusedBodies, changed: [...affected] },
+      stats: { parsed, transformed, bodies, reusedBodies, changed: [...affected] },
     }
   }
 

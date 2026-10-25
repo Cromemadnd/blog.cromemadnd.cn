@@ -6,6 +6,7 @@ import { getPluginSubpathEntry, toFileUrl } from "./gitLoader"
 export async function loadFramesFromPackage(
   pluginName: string,
   manifest: PluginManifest | null,
+  strict = false,
 ): Promise<void> {
   if (!manifest?.frames) return
 
@@ -22,6 +23,7 @@ export async function loadFramesFromPackage(
     for (const [exportName, _frameMeta] of Object.entries(manifest.frames)) {
       const frame = framesModule[exportName]
       if (!frame) {
+        if (strict) throw new Error(`Missing frame ${pluginName}/${exportName}`)
         console.warn(
           `Frame "${exportName}" declared in manifest but not found in ${pluginName}/frames`,
         )
@@ -30,6 +32,7 @@ export async function loadFramesFromPackage(
 
       const pageFrame = frame as PageFrame
       if (!pageFrame.name || typeof pageFrame.render !== "function") {
+        if (strict) throw new Error(`Invalid frame ${pluginName}/${exportName}`)
         console.warn(
           `Frame "${exportName}" from ${pluginName} is not a valid PageFrame (missing name or render)`,
         )
@@ -39,7 +42,8 @@ export async function loadFramesFromPackage(
       // Register under the frame's declared name
       frameRegistry.register(pageFrame.name, pageFrame, pluginName)
     }
-  } catch {
+  } catch (error) {
+    if (strict) throw error
     if (manifest.frames && Object.keys(manifest.frames).length > 0) {
       console.warn(`Plugin "${pluginName}" declares frames but failed to load them`)
     }

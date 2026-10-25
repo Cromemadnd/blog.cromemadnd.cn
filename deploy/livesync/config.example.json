@@ -1,0 +1,24 @@
+{
+  "peers": [
+    {
+      "type": "couchdb",
+      "name": "obsidian-blog",
+      "group": "publishing",
+      "url": "https://couchdb.example.com",
+      "database": "obsidian",
+      "username": "CHANGE_ME",
+      "password": "CHANGE_ME",
+      "passphrase": "CHANGE_ME",
+      "obfuscatePassphrase": "",
+      "baseDir": "blog/",
+      "useRemoteTweaks": true
+    },
+    {
+      "type": "storage",
+      "name": "publisher-mirror",
+      "group": "publishing",
+      "baseDir": "data/vault/",
+      "scanOfflineChanges": false
+    }
+  ]
+}

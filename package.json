@@ -22,12 +22,16 @@
     "prebuild": "npm run install-plugins",
     "cloud:build": "node scripts/build-cloud.mjs",
     "cloud:check": "tsc -p tsconfig.cloud.json",
-    "cloud:test": "node --import tsx --test services/publisher/*.test.ts",
+    "cloud:test": "node --import tsx --test services/publisher/*.test.ts apps/worker/test/*.test.ts",
     "publisher:build": "node --env-file-if-exists=.env .cloud/publisher.mjs build",
     "publisher:publish": "node --env-file-if-exists=.env .cloud/publisher.mjs publish",
     "publisher:watch": "node --env-file-if-exists=.env .cloud/publisher.mjs watch",
     "publisher:status": "node --env-file-if-exists=.env .cloud/publisher.mjs status",
-    "publisher:rollback": "node --env-file-if-exists=.env .cloud/publisher.mjs rollback"
+    "publisher:rollback": "node --env-file-if-exists=.env .cloud/publisher.mjs rollback",
+    "cloud:prepare": "node scripts/prepare-cloud.mjs",
+    "worker:dev": "wrangler dev --config apps/worker/wrangler.jsonc --persist-to .publisher/wrangler",
+    "worker:deploy": "wrangler deploy --config apps/worker/wrangler.jsonc",
+    "worker:dry-run": "wrangler deploy --dry-run --config apps/worker/wrangler.jsonc"
   },
   "engines": {
     "npm": ">=10.9.2",
@@ -66,6 +70,7 @@
     "preact-render-to-string": "^6.6.5",
     "pretty-bytes": "^7.1.0",
     "pretty-time": "^1.1.0",
+    "reading-time": "1.5.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
     "rfdc": "^1.4.1",

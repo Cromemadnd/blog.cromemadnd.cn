@@ -10,13 +10,26 @@ import { createRequire } from "node:module"
 
 await fs.mkdir(".cloud", { recursive: true })
 const config = YAML.parse(await fs.readFile("quartz.config.yaml", "utf8"))
+const enabledPluginPaths = config.plugins
+  .filter((entry) => entry.enabled)
+  .flatMap((entry) => {
+    const value = typeof entry.source === "string" ? entry.source : entry.source.repo
+    const name = value
+      .split("#")[0]
+      .replace(/\.git$/, "")
+      .split("/")
+      .pop()
+    return [
+      `.quartz/plugins/${name}/dist/**/*.js`,
+      `.quartz/plugins/${name}/src/**/*.{ts,tsx,scss}`,
+    ]
+  })
 const inputs = await globby(
   [
     "quartz/**/*.{ts,tsx,scss}",
     "plugins/*/dist/**/*.js",
     "plugins/*/src/**/*.{ts,tsx,scss}",
-    ".quartz/plugins/*/dist/**/*.js",
-    ".quartz/plugins/*/src/**/*.{ts,tsx,scss}",
+    ...enabledPluginPaths,
     "services/**/*.ts",
     "shared/**/*.ts",
     "apps/**/*.{ts,tsx}",
@@ -165,9 +178,17 @@ if (existsSync("apps/worker/src/index.ts")) {
         {
           name: "omit-build-resources",
           setup(build) {
+            build.onResolve({ filter: /^(preact|@quartz-community\/utils)(\/|$)/ }, (args) => {
+              if (args.pluginData?.rootResolution) return undefined
+              return build.resolve(args.path, {
+                resolveDir: process.cwd(),
+                kind: args.kind,
+                pluginData: { rootResolution: true },
+              })
+            })
             // The string-only reading-time API works on Workers; its root also loads a Node stream.
             build.onResolve({ filter: /^reading-time$/ }, ({ resolveDir }) => ({
-              path: createRequire(path.join(resolveDir, "package.json")).resolve(
+              path: createRequire(path.resolve("package.json")).resolve(
                 "reading-time/lib/reading-time",
               ),
             }))

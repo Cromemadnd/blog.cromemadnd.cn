@@ -18,6 +18,8 @@ const pluginsRoot = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.dirname(pluginsRoot);
 
 const SINGLETON_EXTERNALS = [
+  // Native bindings must resolve through the host installation and its platform packages.
+  "sharp",
   "preact",
   "preact/hooks",
   "preact/jsx-runtime",

@@ -78,12 +78,10 @@ export async function publishRelease(
   ]
   for (let i = 0; i < edges.length; i += 40) {
     await target.batch(
-      edges
-        .slice(i, i + 40)
-        .map((edge) => ({
-          sql: "INSERT OR IGNORE INTO links VALUES (?, ?, ?, ?)",
-          params: [release.id, edge.source, edge.target, edge.type],
-        })),
+      edges.slice(i, i + 40).map((edge) => ({
+        sql: "INSERT OR IGNORE INTO links VALUES (?, ?, ?, ?)",
+        params: [release.id, edge.source, edge.target, edge.type],
+      })),
     )
   }
   await target.batch([

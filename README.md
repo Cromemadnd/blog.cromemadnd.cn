@@ -27,3 +27,7 @@ unlisted: true
 实现方式：`quartz.config.yaml` 中启用的 `github:quartz-community/unlisted-pages` 会把 `frontmatter.unlisted` 复制到 `file.data.unlisted`，而 `content-index`、`search`、`graph`、`folder-page`、`tag-page` 等插件都遵循该标记 —— 上述列表以外的组件（目录树、搜索、关系图）都是读取 `content-index` 产出的 `static/contentIndex.json`，因此自动跟随。
 
 注意：`ignorePatterns` 里的 `private` 是**另一回事** —— 它会让文件被完全跳过、连 HTML 都不生成，无法通过 URL 访问。
+
+## Cloudflare SSR 与自动发布
+
+现已提供 Node.js 增量发布器和 Cloudflare Workers SSR 入口，可通过独立 LiveSync Bridge 接入加密 CouchDB。部署、配置和本地验证见 [Cloudflare 改造指南](docs/cloud-migration.md)。原有 Quartz 静态构建入口保留。

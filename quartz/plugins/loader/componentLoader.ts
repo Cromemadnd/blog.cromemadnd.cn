@@ -6,6 +6,7 @@ import { getPluginSubpathEntry, toFileUrl } from "./gitLoader"
 export async function loadComponentsFromPackage(
   pluginName: string,
   manifest: PluginManifest | null,
+  strict = false,
 ): Promise<void> {
   if (!manifest?.components) return
 
@@ -23,6 +24,7 @@ export async function loadComponentsFromPackage(
     for (const [exportName, componentManifest] of componentEntries) {
       const component = componentsModule[exportName]
       if (!component) {
+        if (strict) throw new Error(`Missing component ${pluginName}/${exportName}`)
         console.warn(
           `Component "${exportName}" declared in manifest but not found in ${pluginName}/components`,
         )
@@ -63,7 +65,8 @@ export async function loadComponentsFromPackage(
         )
       }
     }
-  } catch {
+  } catch (error) {
+    if (strict) throw error
     if (manifest.components && Object.keys(manifest.components).length > 0) {
       console.warn(`Plugin "${pluginName}" declares components but failed to load them`)
     }

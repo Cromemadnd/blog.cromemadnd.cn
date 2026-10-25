@@ -7,17 +7,22 @@ import { CloudflareTarget } from "./cloudflare-target"
 import { activeRelease, type PublishTarget } from "./target"
 import { publishRelease, rollback } from "./publish"
 import { BindingTarget } from "./binding-target"
+import { PublisherLock } from "./lock"
 import type { D1Database, R2Bucket } from "@cloudflare/workers-types"
 
 declare const __QUARTZ_RENDERER_ID__: string
 
 const command = process.argv[2] ?? "build"
+const argumentsAfterCommand = process.argv.slice(3).filter((argument) => argument !== "--")
 const source = path.resolve(process.env.PUBLISH_SOURCE ?? "content")
 const stateDirectory = path.resolve(process.env.PUBLISH_STATE_DIR ?? ".publisher")
 const localDirectory = path.resolve(
   process.env.PUBLISH_LOCAL_DIR ?? path.join(stateDirectory, "cloudflare"),
 )
 const isCloud = process.env.PUBLISH_TARGET === "cloudflare"
+if (!["local", "wrangler", "cloudflare"].includes(process.env.PUBLISH_TARGET ?? "local")) {
+  throw new Error("PUBLISH_TARGET must be local, wrangler or cloudflare")
+}
 const truth = (name: string) => process.env[name] === "true"
 const compiler = new QuartzCompiler({
   source,
@@ -93,21 +98,9 @@ async function run(publish: boolean): Promise<void> {
   )
 }
 
-const lockPath = path.join(stateDirectory, "publisher.lock")
-let ownsLock = false
-async function lock(): Promise<void> {
-  try {
-    const file = await fs.open(lockPath, "wx", 0o600)
-    ownsLock = true
-    await file.writeFile(String(process.pid))
-    await file.close()
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "EEXIST")
-      throw new Error(
-        `Publisher lock exists: ${lockPath}. Stop the other publisher; after a crash, verify its PID before removing the lock.`,
-      )
-    throw error
-  }
+let processLock: PublisherLock | undefined
+function lock(): void {
+  processLock = new PublisherLock(path.join(stateDirectory, "publisher-lock.sqlite"))
 }
 
 try {
@@ -124,15 +117,15 @@ try {
       ),
     )
   } else if (command === "rollback") {
-    if (!process.argv[3]) throw new Error("Usage: publisher rollback <release-id>")
-    await lock()
-    await rollback(target, process.argv[3])
-    console.log(`Activated ${process.argv[3]}`)
+    if (!argumentsAfterCommand[0]) throw new Error("Usage: publisher rollback <release-id>")
+    lock()
+    await rollback(target, argumentsAfterCommand[0])
+    console.log(`Activated ${argumentsAfterCommand[0]}`)
   } else if (command === "build" || command === "publish") {
-    await lock()
+    lock()
     await run(command === "publish")
   } else if (command === "watch") {
-    await lock()
+    lock()
     const debounceMs = Number(process.env.PUBLISH_DEBOUNCE_MS ?? 2000)
     const reconcileMs = Number(process.env.PUBLISH_RECONCILE_MS ?? 30_000)
     if (
@@ -160,6 +153,7 @@ try {
       if (running || stopping) return
       running = true
       scheduled = false
+      let nextDelay = debounceMs
       try {
         await run(true)
       } catch (error) {
@@ -169,11 +163,12 @@ try {
             message: error instanceof Error ? error.message : String(error),
           }),
         )
-        schedule(Math.max(5000, debounceMs))
+        scheduled = true
+        nextDelay = Math.max(5000, debounceMs)
       } finally {
         running = false
         if (stopping) finish?.()
-        else if (scheduled || compiler.state.pending().length) schedule()
+        else if (scheduled || compiler.state.pending().length) schedule(nextDelay)
       }
     }
     const watcher = chokidar.watch(source, {
@@ -211,5 +206,5 @@ try {
   compiler.state.close()
   local?.db.close()
   await disposeProxy?.()
-  if (ownsLock) await fs.unlink(lockPath)
+  processLock?.close()
 }
