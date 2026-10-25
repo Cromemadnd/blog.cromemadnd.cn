@@ -6,6 +6,8 @@ import { LocalTarget } from "./local-target"
 import { CloudflareTarget } from "./cloudflare-target"
 import { activeRelease, type PublishTarget } from "./target"
 import { publishRelease, rollback } from "./publish"
+import { BindingTarget } from "./binding-target"
+import type { D1Database, R2Bucket } from "@cloudflare/workers-types"
 
 declare const __QUARTZ_RENDERER_ID__: string
 
@@ -28,6 +30,7 @@ const compiler = new QuartzCompiler({
 
 let target: PublishTarget
 let local: LocalTarget | undefined
+let disposeProxy: (() => Promise<void>) | undefined
 if (isCloud && command !== "build") {
   const required = (key: string) => {
     const value = process.env[key]
@@ -42,6 +45,21 @@ if (isCloud && command !== "build") {
     accessKeyId: required("R2_ACCESS_KEY_ID"),
     secretAccessKey: required("R2_SECRET_ACCESS_KEY"),
   })
+} else if (process.env.PUBLISH_TARGET === "wrangler" && command !== "build") {
+  const { getPlatformProxy } = await import("wrangler")
+  const proxy = await getPlatformProxy<{ DB: D1Database; CONTENT: R2Bucket }>({
+    configPath: "apps/worker/wrangler.jsonc",
+    // The Wrangler CLI appends v3 to --persist-to; getPlatformProxy uses the exact path.
+    persist: { path: path.join(stateDirectory, "wrangler", "v3") },
+  })
+  disposeProxy = proxy.dispose
+  target = new BindingTarget(proxy.env.DB, proxy.env.CONTENT)
+  const migration = await fs.readFile("apps/worker/migrations/0001_releases.sql", "utf8")
+  for (const sql of migration
+    .split(";")
+    .map((item) => item.trim())
+    .filter(Boolean))
+    await target.query({ sql })
 } else {
   local = new LocalTarget(localDirectory)
   await local.migrate()
@@ -68,7 +86,7 @@ async function run(publish: boolean): Promise<void> {
   console.log(
     JSON.stringify({
       event: "published",
-      target: isCloud ? "cloudflare" : "local",
+      target: process.env.PUBLISH_TARGET ?? "local",
       release: result.release.id,
       ...counts,
     }),
@@ -192,5 +210,6 @@ try {
 } finally {
   compiler.state.close()
   local?.db.close()
+  await disposeProxy?.()
   if (ownsLock) await fs.unlink(lockPath)
 }

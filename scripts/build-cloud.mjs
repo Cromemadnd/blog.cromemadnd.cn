@@ -6,20 +6,23 @@ import path from "node:path"
 import { createHash } from "node:crypto"
 import { existsSync } from "node:fs"
 import YAML from "yaml"
+import { createRequire } from "node:module"
 
-const root = process.cwd()
 await fs.mkdir(".cloud", { recursive: true })
 const config = YAML.parse(await fs.readFile("quartz.config.yaml", "utf8"))
 const inputs = await globby(
   [
     "quartz/**/*.{ts,tsx,scss}",
     "plugins/*/dist/**/*.js",
+    "plugins/*/src/**/*.{ts,tsx,scss}",
     ".quartz/plugins/*/dist/**/*.js",
+    ".quartz/plugins/*/src/**/*.{ts,tsx,scss}",
     "services/**/*.ts",
     "shared/**/*.ts",
     "apps/**/*.{ts,tsx}",
     "scripts/build-cloud.mjs",
     "quartz.config.yaml",
+    "quartz.ts",
     "quartz.lock.json",
     "package.json",
     "pnpm-lock.yaml",
@@ -134,7 +137,14 @@ for (const entry of config.plugins.filter((entry) => entry.enabled)) {
 }
 lines.push(`export const layout = buildQuartzLayout(${JSON.stringify(config)})`)
 lines.push(`export const rendererId = ${JSON.stringify(rendererId)}`)
-await fs.writeFile(".cloud/runtime-layout.ts", lines.join("\n"))
+await fs.writeFile(".cloud/runtime-layout.mjs", lines.join("\n"))
+await fs.writeFile(
+  ".cloud/runtime-layout.d.mts",
+  `import type { FullPageLayout } from "../quartz/cfg";
+export declare const layout: { defaults: Partial<FullPageLayout>; byPageType: Record<string, Partial<FullPageLayout>> };
+export declare const rendererId: string;
+`,
+)
 
 if (existsSync("apps/worker/src/index.ts")) {
   await esbuild
@@ -151,10 +161,29 @@ if (existsSync("apps/worker/src/index.ts")) {
       metafile: true,
       external: ["node:crypto", "node:util", "crypto", "util"],
       plugins: [
+        sassPlugin({ type: "css-text", cssImports: true }),
         {
           name: "omit-build-resources",
           setup(build) {
-            build.onLoad({ filter: /\.(scss|inline\.(ts|js))$/ }, () => ({
+            // The string-only reading-time API works on Workers; its root also loads a Node stream.
+            build.onResolve({ filter: /^reading-time$/ }, ({ resolveDir }) => ({
+              path: createRequire(path.join(resolveDir, "package.json")).resolve(
+                "reading-time/lib/reading-time",
+              ),
+            }))
+            build.onResolve({ filter: /^style-to-js$/ }, ({ resolveDir }) => ({
+              path: createRequire(path.join(resolveDir, "package.json")).resolve("style-to-js"),
+              namespace: "style-to-js-interop",
+            }))
+            build.onLoad(
+              { filter: /.*/, namespace: "style-to-js-interop" },
+              ({ path: filename }) => ({
+                contents: `import value from ${JSON.stringify(filename)}; export default typeof value === "function" ? value : value.default;`,
+                loader: "js",
+                resolveDir: path.dirname(filename),
+              }),
+            )
+            build.onLoad({ filter: /\.inline\.(ts|js)$/ }, () => ({
               contents: "",
               loader: "text",
             }))
