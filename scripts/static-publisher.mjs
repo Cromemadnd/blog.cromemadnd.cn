@@ -55,6 +55,7 @@ let timer
 let task
 let closing = false
 let dirty = false
+let loadedConfiguration
 let lastBuiltSource
 let resolveDone
 const done = new Promise((resolve) => {
@@ -101,7 +102,10 @@ async function cleanupOutputs() {
 async function build() {
   const ready = process.env.STATIC_READY_FILE
   if (ready) await fs.access(ready)
-  const cfg = YAML.parse(await fs.readFile("quartz.config.yaml", "utf8"))
+  const configuration = await fs.readFile("quartz.config.yaml", "utf8")
+  if (configuration !== loadedConfiguration)
+    throw new Error("Quartz configuration changed; restart the static publisher")
+  const cfg = YAML.parse(configuration)
   const ignore = cfg.configuration.ignorePatterns ?? []
   const source = await fs.realpath(path.resolve(process.env.STATIC_SOURCE ?? "content"))
   assertSeparate(source, await fs.realpath(state))
@@ -129,9 +133,9 @@ async function build() {
     }
     await writeJson(path.join(state, "latest.json"), snapshot)
     await pointSnapshot(state, output)
-    lastBuiltSource = scanned.id
     log({ event: "built", id: snapshot.id, source: scanned.id, ms: Date.now() - start, ...stats })
     if (queue) await queue.offer(snapshot)
+    lastBuiltSource = scanned.id
     await cleanupOutputs()
     return snapshot
   } catch (error) {
@@ -161,6 +165,7 @@ try {
       })
     }
   } else {
+    loadedConfiguration = await fs.readFile("quartz.config.yaml", "utf8")
     runtime = await loadCompiler(state, {
       skipOgImages: process.env.STATIC_SKIP_OG_IMAGES === "true",
     })

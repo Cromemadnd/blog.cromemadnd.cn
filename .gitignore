@@ -28,3 +28,6 @@ deploy/data/
 .static-publisher/
 .env.static
 !.env.static.example
+
+# Wrangler local state (including per-app dev state)
+.wrangler/
