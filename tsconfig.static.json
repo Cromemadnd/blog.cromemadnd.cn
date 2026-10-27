@@ -9,7 +9,9 @@
     "quartz/**/*.tsx",
     "quartz.ts",
     "globals.d.ts",
-    "index.d.ts"
+    "index.d.ts",
+    "plugins/stable-toc/src/**/*.ts",
+    "plugins/stable-toc/src/**/*.tsx"
   ],
   "exclude": ["quartz/cli/tui/**"]
 }

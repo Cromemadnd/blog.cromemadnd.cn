@@ -1,0 +1,71 @@
+{
+  "version": "0.1.0",
+  "description": "Table of Contents component for Quartz",
+  "type": "module",
+  "license": "MIT",
+  "author": "Quartz Community",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quartz-community/table-of-contents"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    },
+    "./components": {
+      "import": "./dist/components/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "quartz": {
+    "name": "stable-toc",
+    "displayName": "Stable Table of Contents",
+    "category": [
+      "transformer",
+      "component"
+    ],
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 50,
+    "defaultEnabled": true,
+    "defaultOptions": {
+      "maxDepth": 3,
+      "minEntries": 1,
+      "showByDefault": true,
+      "collapseByDefault": false,
+      "layout": "modern"
+    },
+    "components": {
+      "TableOfContents": {
+        "displayName": "Table of Contents",
+        "defaultPosition": "right",
+        "defaultPriority": 50
+      }
+    },
+    "optionSchema": {
+      "maxDepth": {
+        "type": "number"
+      },
+      "minEntries": {
+        "type": "number"
+      },
+      "showByDefault": {
+        "type": "boolean"
+      },
+      "collapseByDefault": {
+        "type": "boolean"
+      },
+      "layout": {
+        "type": "enum",
+        "values": [
+          "modern",
+          "legacy"
+        ]
+      }
+    }
+  },
+  "name": "@cromemadnd/stable-toc",
+  "private": true
+}

@@ -41,13 +41,13 @@ pnpm static:preview
 
 `static:build` 默认读取 `content/`，不访问 Cloudflare；产物与缓存写入 `.static-publisher/`。`snapshot` 是指向最新完整输出的符号链接。`static:preview` 用真实本地 workerd 提供该目录，不需要 Cloudflare 凭据。不要把 `snapshot/` 当作 Quartz 的可变构建目录。
 
-仅在本地省去分享图生成：
+分享图生成已在 `quartz.config.yaml` 中默认禁用，页面使用统一的 `static/og-image.png`。如果以后重新启用插件，可以仅在本地临时跳过生成：
 
 ```bash
 STATIC_SKIP_OG_IMAGES=true pnpm static:build
 ```
 
-默认保留配置中启用的 OG-image 插件；首次生成可能需要下载字体和表情资源。原生 `pnpm quartz build` 和 `pnpm quartz build --watch` 不受新发布器影响。
+仅在手工重新启用 OG-image 插件时，首次生成才可能下载字体和表情资源。原生 `pnpm quartz build` 和 `pnpm quartz build --watch` 不受新发布器影响。
 
 ## 首次发布到独立 Worker
 
@@ -151,7 +151,7 @@ docker compose -f deploy/compose.static.yaml up -d publisher
 
 - Markdown 和 HTML AST 分别缓存到 SQLite。普通正文修改只重新解析变化的文章；新增、删除、重命名改变文件命名空间时保守失效；别名变化会使相关 HTML 转换缓存失效。
 - 缓存只保存渲染前的 AST，每批使用独立副本，避免转引与页面渲染污染后续构建。
-- 页面、目录、标签、反向链接、搜索索引、RSS、站点地图等输出保守地完整生成，保证嵌入与全站元数据更新。组件资源在进程内复用，OG 图片按页面元数据缓存。这是“增量解析 + 完整输出快照”，不保证只重新渲染受影响的单个页面。
+- 页面、目录、标签、反向链接、搜索索引、RSS、站点地图等输出保守地完整生成，保证嵌入与全站元数据更新。组件资源在进程内复用；默认禁用 OG 图片生成，重新启用时仍按页面元数据缓存。这是“增量解析 + 完整输出快照”，不保证只重新渲染受影响的单个页面。
 - 输入先复制为快照并检查变化，输出写入全新目录；解析、插件输出、大小检查或快照检查失败时保留上一版。删除、重命名、草稿和别名移除不会沿用旧输出目录里的残留文件。
 - 每次向 Cloudflare 提供完整站点清单；由 Wrangler 与平台决定需要上传的资产。通常只上传变化的文件，平台要求补传时也会自动补传，不依赖本地猜测远端是否存在。
 - 部署串行执行。部署期间允许下一批构建，待发布版本合并为最新完整快照；不会并发发布导致旧版本覆盖新版本。
@@ -197,10 +197,10 @@ pnpm exec wrangler rollback 目标版本ID --config apps/static/wrangler.jsonc
 
 ## 日志、磁盘与验证范围
 
-Publisher 输出 JSON 事件：`watching`、`built`、`build-failed`、`published`、`publish-failed`。`built` 的 `parsed`、`transformed`、`reused` 和 `ms` 可用于确认缓存是否生效；Wrangler 输出实际上传文件数量和部署结果。`latest.json` 记录最后成功构建，`desired.json` 记录待发布版本，`deployed.json` 记录本发布器最后成功提交的版本；手动控制台部署不会自动同步回这些本地记录。
+Publisher 输出 JSON 事件：`watching`、`built`、`build-failed`、`published`、`publish-failed`。`built` 的 `parsed`、`transformed`、`reused` 和 `ms` 可用于确认缓存是否生效；`ioMs` 记录扫描、复制、复核和输出清单耗时，`timingsMs` 与 `emitterMs` 记录编译阶段和各输出插件耗时。`ms` 包含源扫描，但不包含进程启动和运行时打包；Wrangler 输出实际上传文件数量和部署结果。`latest.json` 记录最后成功构建，`desired.json` 记录待发布版本，`deployed.json` 记录本发布器最后成功提交的版本；手动控制台部署不会自动同步回这些本地记录。
 
 正常构建会清理不再使用的输出快照，保留最新、待发布及已发布的快照，上传进行中暂缓清理。SQLite 解析缓存和 OG 缓存不会自动按历史版本淘汰，应监控磁盘。需要清理时先停 Publisher，可删除 `parse.sqlite`、`og-cache/`、`component-resources/` 后重新构建；不要删除源镜像或正在上传的输出。进程强制终止留下的 `inputs/` 和 `quartz/.quartz-cache/static-*` 可以在停机后清理。
 
-本次验证包括：真实 Quartz 插件的缓存复用、嵌入更新、别名移除、草稿/隐藏文章、删除/重命名、进程重启、监听重试、部署队列合并与串行、快照完整性、文件大小和配置注入防护；同时验证 Quartz 的路径、转引、页面资源及搜索等原生回归测试。本地 workerd 验证了 HTML、JSON、图片、404 和 ETag 304；独立 workers.dev 也验证了页面、JSON、图片及 404。线上临时文件测试确认：首次新增和同名修改各只上传 1 个资产，修改后带旧 ETag 的请求得到新内容，删除后返回 404，全程未清缓存；测试文件已移除并恢复原博客快照。再次发布相同快照时，Wrangler 确认无需上传资产。一次单文件更新实测 Worker 上传阶段 3.89 秒、触发器部署 0.76 秒（文件上传包含在前者中），不包含 LiveSync 和合并等待，不代表固定时延承诺。当前博客 20 个 Markdown 中有 18 篇可发布文章，生成 112 个文件；缓存命中时一次本地构建实测约 396 ms，不包含进程打包、LiveSync 和远端部署耗时。
+本次验证包括：真实 Quartz 插件的缓存复用、嵌入更新、别名移除、草稿/隐藏文章、删除/重命名、进程重启、监听重试、部署队列合并与串行、快照完整性、文件大小和配置注入防护；同时验证 Quartz 的路径、转引、页面资源及搜索等原生回归测试。本地 workerd 验证了 HTML、JSON、图片、404 和 ETag 304；独立 workers.dev 也验证了页面、JSON、图片及 404。线上临时文件测试确认：首次新增和同名修改各只上传 1 个资产，修改后带旧 ETag 的请求得到新内容，删除后返回 404，全程未清缓存；测试文件已移除并恢复原博客快照。再次发布相同快照时，Wrangler 确认无需上传资产。一次单文件更新实测 Worker 上传阶段 3.89 秒、触发器部署 0.76 秒（文件上传包含在前者中），不包含 LiveSync 和合并等待，不代表固定时延承诺。迁移阶段生成过 112 个文件；本轮默认禁用 OG 后不再输出逐篇分享图，文件数量以实际构建结果为准。最新的同条件对照、热点和优化范围见 [性能分析报告](./performance-analysis.md)。
 
 Docker Hub 在当前环境连接超时，正式 Dockerfile 的全新基础镜像构建尚未完成；已另用本机已有 Node 24 发布器镜像验证新代码的容器运行。真实 CouchDB 的同步兼容性、服务器长期运行与端到端更新时间，仍需在服务器上接入实际配置验证。

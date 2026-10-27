@@ -33,3 +33,5 @@ unlisted: true
 推荐使用自建服务器上的 LiveSync Bridge + 增量解析发布器，生成完整 Quartz 静态快照并增量上传到独立 Workers Static Assets。无需 R2、D1 或 Tunnel，部署见 [Static Assets 部署文档](docs/static-assets-deployment.md)。
 
 原生 `pnpm quartz build` 和本地预览入口继续保留。
+
+性能热点、优化前后数据与复现命令见 [性能分析报告](docs/performance-analysis.md)。

@@ -37,7 +37,7 @@ test(
     }
     const read = (result, filename) => fs.readFile(path.join(result.output, filename), "utf8")
     const note = (body, extra = "", aliases = "old-alias") =>
-      `---\ntitle: Note\naliases: [${aliases}]\ntags: [testing]\n${extra}---\n\n${body}\n`
+      `---\ntitle: Note\naliases: [${aliases}]\ntags: [testing]\n${extra}---\n\n# Introduction\n\n${body}\n\n## Details\n\nMore details.\n`
     await fs.writeFile(path.join(source, "index.md"), "---\ntitle: Home\n---\n\n![[note]]\n")
     await fs.writeFile(path.join(source, "note.md"), note("ORIGINAL_EMBED"))
     await fs.writeFile(path.join(source, "image.png"), Buffer.from([0, 1, 255]))
@@ -46,6 +46,10 @@ test(
     assert.match(await read(first, "index.html"), /ORIGINAL_EMBED/)
     assert.ok(first.manifest.files["old-alias.html"])
     assert.ok(first.manifest.files["image.png"])
+    const tocHtml = await read(first, "note.html")
+    const controlledId = tocHtml.match(/aria-controls="(toc-[^"]+)"/)?.[1]
+    assert.ok(controlledId, "Fixture must exercise a real table of contents")
+    assert.ok(tocHtml.includes(`id="${controlledId}"`), "TOC button must reference its list")
     const warm = await build()
     assert.equal(warm.stats.parsed, 0)
     assert.equal(warm.stats.transformed, 0)
@@ -105,6 +109,13 @@ test(
     )
     await assert.rejects(build(), /Invalid date/)
     assert.match(await read(restarted, "renamed.html"), /Renamed content/)
+    await fs.writeFile(
+      path.join(source, "renamed.md"),
+      "---\ntitle: Recovered\n---\nRecovered after transaction rollback\n",
+    )
+    const recovered = await build()
+    assert.match(await read(recovered, "renamed.html"), /Recovered after transaction rollback/)
+    assert.equal((await build()).manifest.id, recovered.manifest.id)
     await fs.rm(path.join(source, "index.md"))
     await fs.rm(path.join(source, "renamed.md"))
     await assert.rejects(build(), /empty source/)

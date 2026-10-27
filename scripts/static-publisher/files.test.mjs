@@ -3,7 +3,14 @@ import assert from "node:assert/strict"
 import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
-import { assertSeparate, scanSource, captureSource, finalizeOutput, inventory } from "./files.mjs"
+import {
+  assertSeparate,
+  scanSource,
+  captureSource,
+  finalizeOutput,
+  inventory,
+  mapFiles,
+} from "./files.mjs"
 import { deploySnapshot } from "./queue.mjs"
 
 test("source snapshot detects mutation, ignores private/hidden files, and copies binary attachments", async (t) => {
@@ -44,4 +51,34 @@ test("output validates size, control files, and content before upload", async (t
   await fs.rm(path.join(root, "large.bin"))
   await fs.symlink(path.join(root, "index.html"), path.join(root, "link"))
   await assert.rejects(inventory(root), /Symlink/)
+})
+
+test("parallel file operations preserve order, bound concurrency and drain failures before cleanup", async () => {
+  let active = 0
+  let maximum = 0
+  const delay = () => new Promise((resolve) => setTimeout(resolve, 5))
+  const values = Array.from({ length: 20 }, (_, i) => i)
+  assert.deepEqual(
+    await mapFiles(values, async (value) => {
+      maximum = Math.max(maximum, ++active)
+      await delay()
+      active--
+      return value * 2
+    }),
+    values.map((value) => value * 2),
+  )
+  assert.equal(maximum, 4)
+  await assert.rejects(
+    mapFiles(values, async (value) => {
+      active++
+      try {
+        if (value === 0) throw new Error("copy failed")
+        await delay()
+      } finally {
+        active--
+      }
+    }),
+    /copy failed/,
+  )
+  assert.equal(active, 0, "No writes may outlive failure cleanup")
 })

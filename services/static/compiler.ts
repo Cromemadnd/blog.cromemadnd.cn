@@ -1,6 +1,6 @@
 import fs from "node:fs/promises"
 import path from "node:path"
-import { DatabaseSync } from "node:sqlite"
+import { DatabaseSync, type StatementSync } from "node:sqlite"
 import { createHash } from "node:crypto"
 import { VFile } from "vfile"
 import type { Root as MarkdownRoot } from "remark-parse/lib"
@@ -40,6 +40,8 @@ function cacheData(file: VFile) {
 
 export class StaticCompiler {
   private db: DatabaseSync
+  private readCache: StatementSync
+  private writeCache: StatementSync
   private configuration: ReturnType<typeof loadQuartzConfig>
   // These outputs depend on code/config, which is fixed for this process lifetime.
   private resources?: { directory: string; data: Partial<BuildCtx> }
@@ -55,21 +57,30 @@ export class StaticCompiler {
     void this.configuration.catch(() => {})
     this.db = new DatabaseSync(path.join(state, "parse.sqlite"))
     this.db.exec("CREATE TABLE IF NOT EXISTS cache (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    this.readCache = this.db.prepare("SELECT value FROM cache WHERE key = ?")
+    this.writeCache = this.db.prepare("INSERT OR REPLACE INTO cache (key, value) VALUES (?, ?)")
+  }
+
+  async ready() {
+    await this.configuration
   }
 
   private get(key: string): Cached | undefined {
-    const row = this.db.prepare("SELECT value FROM cache WHERE key = ?").get(key)
+    const row = this.readCache.get(key)
     return row ? JSON.parse(row.value as string) : undefined
   }
 
   private put(key: string, value: Cached) {
-    this.db
-      .prepare("INSERT OR REPLACE INTO cache (key, value) VALUES (?, ?)")
-      .run(key, JSON.stringify(value))
+    this.writeCache.run(key, JSON.stringify(value))
   }
 
   async build(input: Input, output: string, compilerId: string) {
+    const started = performance.now()
+    const timingsMs: Record<string, number> = {}
+    const emitterMs: Record<string, number> = {}
+    let stage = performance.now()
     const cfg = await this.configuration
+    timingsMs.configuration = performance.now() - stage
     const files = Object.keys(input.files).sort() as FilePath[]
     if (!files.some((name) => name.endsWith(".md"))) throw new Error("Refusing empty source")
     const ctx: BuildCtx = {
@@ -147,50 +158,61 @@ export class StaticCompiler {
           })),
       }
     })
+    stage = performance.now()
     const md = createMdProcessor(ctx)
     const markdown: { key: string; tree: MarkdownRoot; file: VFile }[] = []
     let parsed = 0
     let transformed = 0
-    for (const relative of files.filter((name) => name.endsWith(".md"))) {
-      const key = digest(["md", namespace, relative, input.files[relative]])
-      const cached = this.get(key)
-      const file = new VFile({ path: path.join(input.directory, relative) })
-      if (cached) {
-        restore(file, cached.data)
-        file.value = cached.value ?? ""
-        ctx.allSlugs.push(...((file.data.aliases as FullSlug[] | undefined) ?? []))
-        markdown.push({ key, tree: cached.tree as MarkdownRoot, file })
-      } else {
-        file.value = (await fs.readFile(file.path, "utf8")).trim()
-        file.data.filePath = file.path as FilePath
-        file.data.relativePath = relative
-        file.data.slug = slugifyFilePath(relative)
-        for (const plugin of ctx.cfg.plugins.transformers) {
-          if (plugin.textTransform) file.value = plugin.textTransform(ctx, file.toString())
-        }
-        const tree = await md.run(md.parse(file), file)
-        this.put(key, { tree, data: cacheData(file), value: file.toString() })
-        markdown.push({ key, tree, file })
-        parsed++
-      }
-    }
-    ctx.allSlugs = [...new Set(ctx.allSlugs)].sort()
-    const resolvedNamespace = digest(ctx.allSlugs)
-    const html = createHtmlProcessor(ctx)
     const content: ProcessedContent[] = []
-    for (const item of markdown) {
-      const key = digest(["html", item.key, resolvedNamespace])
-      const cached = this.get(key)
-      if (cached) {
-        restore(item.file, cached.data)
-        content.push([cached.tree as Root, item.file])
-      } else {
-        const tree = await html.run(structuredClone(item.tree), item.file)
-        this.put(key, { tree, data: cacheData(item.file) })
-        content.push([tree, item.file])
-        transformed++
+    this.db.exec("BEGIN")
+    try {
+      for (const relative of files.filter((name) => name.endsWith(".md"))) {
+        const key = digest(["md", namespace, relative, input.files[relative]])
+        const cached = this.get(key)
+        const file = new VFile({ path: path.join(input.directory, relative) })
+        if (cached) {
+          restore(file, cached.data)
+          file.value = cached.value ?? ""
+          ctx.allSlugs.push(...((file.data.aliases as FullSlug[] | undefined) ?? []))
+          markdown.push({ key, tree: cached.tree as MarkdownRoot, file })
+        } else {
+          file.value = (await fs.readFile(file.path, "utf8")).trim()
+          file.data.filePath = file.path as FilePath
+          file.data.relativePath = relative
+          file.data.slug = slugifyFilePath(relative)
+          for (const plugin of ctx.cfg.plugins.transformers) {
+            if (plugin.textTransform) file.value = plugin.textTransform(ctx, file.toString())
+          }
+          const tree = await md.run(md.parse(file), file)
+          this.put(key, { tree, data: cacheData(file), value: file.toString() })
+          markdown.push({ key, tree, file })
+          parsed++
+        }
       }
+      timingsMs.markdown = performance.now() - stage
+      stage = performance.now()
+      ctx.allSlugs = [...new Set(ctx.allSlugs)].sort()
+      const resolvedNamespace = digest(ctx.allSlugs)
+      const html = createHtmlProcessor(ctx)
+      for (const item of markdown) {
+        const key = digest(["html", item.key, resolvedNamespace])
+        const cached = this.get(key)
+        if (cached) {
+          restore(item.file, cached.data)
+          content.push([cached.tree as Root, item.file])
+        } else {
+          const tree = await html.run(structuredClone(item.tree), item.file)
+          this.put(key, { tree, data: cacheData(item.file) })
+          content.push([tree, item.file])
+          transformed++
+        }
+      }
+      this.db.exec("COMMIT")
+    } catch (error) {
+      this.db.exec("ROLLBACK")
+      throw error
     }
+    timingsMs.html = performance.now() - stage
     if (detectSlugCollisions(content).length) throw new Error("Duplicate article slugs")
     const published = filterContent(ctx, content)
     if (!published.length) throw new Error("Refusing to publish zero articles")
@@ -205,6 +227,7 @@ export class StaticCompiler {
         }
       }
     }
+    stage = performance.now()
     const componentResources = cfg.plugins.emitters.find((e) => e.name === "ComponentResources")
     if (componentResources) {
       if (this.resources) {
@@ -225,17 +248,32 @@ export class StaticCompiler {
         }
       }
     }
+    timingsMs.resources = performance.now() - stage
+    stage = performance.now()
     const dispatcher = cfg.plugins.emitters.find((e) => e.name === "PageTypeDispatcher")
     if (dispatcher) await emit(dispatcher)
+    timingsMs.pages = performance.now() - stage
+    let ogGenerated = 0
+    let ogReused = 0
     const all = [...published, ...ctx.virtualPages]
     for (const emitter of cfg.plugins.emitters) {
       if (["ComponentResources", "PageTypeDispatcher"].includes(emitter.name)) continue
+      const emitterStart = performance.now()
       if (emitter.name === "CustomOgImages") {
         // OG images can be expensive. Cache each page's output independently.
-        for (const page of all) await this.emitOg(emitter, ctx, page, resources, compilerId)
+        for (const page of all) {
+          if (await this.emitOg(emitter, ctx, page, resources, compilerId)) ogGenerated++
+          else ogReused++
+        }
       } else await emit(emitter, all)
+      emitterMs[emitter.name] = performance.now() - emitterStart
     }
+    timingsMs.total = performance.now() - started
     return {
+      timingsMs,
+      emitterMs,
+      ogGenerated,
+      ogReused,
       parsed,
       transformed,
       reused: markdown.length - transformed,
@@ -263,7 +301,7 @@ export class StaticCompiler {
         await fs.mkdir(path.dirname(target), { recursive: true })
         await fs.copyFile(path.join(directory, "assets", relative), target)
       }
-      return
+      return false
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error
     }
@@ -283,6 +321,7 @@ export class StaticCompiler {
     } else for (const filename of emitted) await save(filename)
     await fs.mkdir(directory, { recursive: true })
     await fs.writeFile(path.join(directory, "files.json"), JSON.stringify(paths))
+    return true
   }
 
   close() {

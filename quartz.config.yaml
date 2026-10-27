@@ -31,7 +31,7 @@ configuration:
         highlight: rgba(143, 159, 169, 0.15)
         textHighlight: "#fff23688"
       # Mirrors the site palette defined in quartz/styles/custom.scss.
-      # OG share cards are generated from darkMode (see og-image colorScheme).
+      # The optional OG plugin uses darkMode when enabled (see og-image colorScheme).
       darkMode:
         light: "#000000"
         lightgray: "#202020"
@@ -69,7 +69,7 @@ plugins:
   - source: github:quartz-community/github-flavored-markdown
     enabled: true
     order: 40
-  - source: github:quartz-community/table-of-contents
+  - source: ./plugins/stable-toc
     enabled: true
     order: 50
     layout:
@@ -126,7 +126,7 @@ plugins:
   - source: github:quartz-community/favicon
     enabled: true
   - source: ./plugins/og-image
-    enabled: true
+    enabled: false
   - source: github:quartz-community/cname
     enabled: true
   - source: github:quartz-community/canvas-page

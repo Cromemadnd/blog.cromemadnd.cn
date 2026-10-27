@@ -109,21 +109,29 @@ async function build() {
   const ignore = cfg.configuration.ignorePatterns ?? []
   const source = await fs.realpath(path.resolve(process.env.STATIC_SOURCE ?? "content"))
   assertSeparate(source, await fs.realpath(state))
+  const start = performance.now()
+  let stage = start
   const scanned = await scanSource(source, ignore)
+  const ioMs = { scan: performance.now() - stage }
   if (lastBuiltSource === scanned.id) return
   const id = randomUUID()
   const inputDirectory = path.join(state, "inputs", id)
   const output = path.join(state, "outputs", id)
   await fs.mkdir(path.dirname(inputDirectory), { recursive: true })
   await fs.mkdir(path.dirname(output), { recursive: true })
-  const start = Date.now()
   try {
+    stage = performance.now()
     const input = await captureSource(source, inputDirectory, scanned)
+    ioMs.capture = performance.now() - stage
+    stage = performance.now()
     // Detect additions, deletions, renames, or edits made during the copy.
     if ((await scanSource(source, ignore)).id !== scanned.id)
       throw new Error("Source changed during snapshot; retrying")
+    ioMs.verify = performance.now() - stage
     const stats = await runtime.compiler.build(input, output, runtime.id)
+    stage = performance.now()
     const manifest = await finalizeOutput(output)
+    ioMs.inventory = performance.now() - stage
     const snapshot = {
       directory: output,
       id: manifest.id,
@@ -133,7 +141,14 @@ async function build() {
     }
     await writeJson(path.join(state, "latest.json"), snapshot)
     await pointSnapshot(state, output)
-    log({ event: "built", id: snapshot.id, source: scanned.id, ms: Date.now() - start, ...stats })
+    log({
+      event: "built",
+      id: snapshot.id,
+      source: scanned.id,
+      ms: performance.now() - start,
+      ioMs,
+      ...stats,
+    })
     if (queue) await queue.offer(snapshot)
     lastBuiltSource = scanned.id
     await cleanupOutputs()
@@ -169,6 +184,8 @@ try {
     runtime = await loadCompiler(state, {
       skipOgImages: process.env.STATIC_SKIP_OG_IMAGES === "true",
     })
+    // Attribute one-time plugin initialization to startup, not the first source scan.
+    await runtime.compiler.ready()
     if (command === "build") await build()
     else {
       if (!flags.includes("--no-deploy")) {
