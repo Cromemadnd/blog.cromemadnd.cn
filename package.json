@@ -31,7 +31,13 @@
     "cloud:prepare": "node scripts/prepare-cloud.mjs",
     "worker:dev": "wrangler dev --config apps/worker/wrangler.jsonc --persist-to .publisher/wrangler",
     "worker:deploy": "wrangler deploy --config apps/worker/wrangler.jsonc",
-    "worker:dry-run": "wrangler deploy --dry-run --config apps/worker/wrangler.jsonc"
+    "worker:dry-run": "wrangler deploy --dry-run --config apps/worker/wrangler.jsonc",
+    "static:prepare": "node scripts/prepare-cloud.mjs",
+    "static:build": "node --env-file-if-exists=.env.static scripts/static-publisher.mjs build",
+    "static:watch": "node --env-file-if-exists=.env.static scripts/static-publisher.mjs watch",
+    "static:deploy": "node --env-file-if-exists=.env.static scripts/static-publisher.mjs deploy",
+    "static:preview": "wrangler dev --config apps/static/wrangler.jsonc",
+    "static:test": "node --test scripts/static-publisher/*.test.mjs"
   },
   "engines": {
     "npm": ">=10.9.2",

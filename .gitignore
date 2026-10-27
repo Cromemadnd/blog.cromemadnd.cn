@@ -23,3 +23,8 @@ quartz/cli/tui/dist/
 !.env.example
 deploy/livesync/config.json
 deploy/data/
+
+# Static Assets publisher snapshots and credentials
+.static-publisher/
+.env.static
+!.env.static.example

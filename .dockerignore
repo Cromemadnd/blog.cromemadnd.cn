@@ -15,3 +15,5 @@ deploy/data
 deploy/livesync/config.json
 **/*.sqlite*
 tsconfig.tsbuildinfo
+
+.static-publisher
