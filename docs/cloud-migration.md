@@ -1,4 +1,6 @@
-# Cloudflare 发布与 SSR
+# Cloudflare 发布与 SSR（旧入口）
+
+推荐的新部署方案见 [Quartz 增量发布到 Workers Static Assets](./static-assets-deployment.md)，不依赖 R2 或 D1。本文保留用于旧 SSR 入口运维与迁移回退。
 
 本项目现在提供两个入口：原有 Quartz 静态构建，以及 Node.js 发布器 + Cloudflare Workers SSR。文章修改通过独立的 LiveSync Bridge 从加密 CouchDB 还原到本地镜像，再由发布器处理。
 

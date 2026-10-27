@@ -1,0 +1,32 @@
+name: quartz-static-publisher
+services:
+  bridge:
+    build:
+      context: https://github.com/vrtmrz/livesync-bridge.git#fc0e028d33b3a12ddee1322951375e05107edc55
+    user: "0:0"
+    restart: unless-stopped
+    volumes:
+      - vault:/app/data
+      - ./livesync/config.json:/app/dat/config.json:ro
+      - bridge-state:/deno-dir/location_data
+
+  publisher:
+    build:
+      context: ..
+      dockerfile: deploy/StaticPublisher.Dockerfile
+    env_file: ${STATIC_ENV_FILE:-../.env.static}
+    environment:
+      STATIC_SOURCE: /vault-data/vault
+      STATIC_STATE_DIR: /state
+      STATIC_READY_FILE: /vault-data/.publisher-ready
+      TZ: Asia/Shanghai
+    restart: unless-stopped
+    stop_grace_period: 3m
+    volumes:
+      - vault:/vault-data:ro
+      - publisher-state:/state
+
+volumes:
+  vault:
+  bridge-state:
+  publisher-state:

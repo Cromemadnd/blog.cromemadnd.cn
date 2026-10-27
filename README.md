@@ -28,6 +28,8 @@ unlisted: true
 
 注意：`ignorePatterns` 里的 `private` 是**另一回事** —— 它会让文件被完全跳过、连 HTML 都不生成，无法通过 URL 访问。
 
-## Cloudflare SSR 与自动发布
+## Cloudflare Static Assets 与自动发布
 
-现已提供 Node.js 增量发布器和 Cloudflare Workers SSR 入口，可通过独立 LiveSync Bridge 接入加密 CouchDB。部署、配置和本地验证见 [Cloudflare 改造指南](docs/cloud-migration.md)。原有 Quartz 静态构建入口保留。
+推荐使用自建服务器上的 LiveSync Bridge + 增量解析发布器，生成完整 Quartz 静态快照并增量上传到独立 Workers Static Assets。无需 R2、D1 或 Tunnel，部署见 [Static Assets 部署文档](docs/static-assets-deployment.md)。
+
+原有 SSR/D1/R2 入口暂时保留用于迁移回退，旧文档见 [Cloudflare SSR 改造指南](docs/cloud-migration.md)。
