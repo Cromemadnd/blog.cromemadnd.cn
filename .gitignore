@@ -14,13 +14,12 @@ quartz/cli/tui/dist/
 
 .zcode/
 
-# Cloud publisher state, generated bundles and deployment credentials
+# Credentials and historical local state (never commit)
 .cloud/
 .publisher/
 .publisher-dev/
 .env
 .env.*
-!.env.example
 deploy/livesync/config.json
 deploy/data/
 

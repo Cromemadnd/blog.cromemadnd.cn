@@ -17,11 +17,11 @@
                                     浏览器
 ```
 
-## 部署入口与旧版本
+## 部署入口
 
 新入口为 `apps/static/wrangler.jsonc`，Worker 名称是 `cromemadnd-blog-static`，没有自定义 Worker 脚本、数据库或桶绑定。默认只开放 `workers.dev`，不修改 `blog.cromemadnd.cn` 的域名映射。本次已创建并验证的预览地址是 [cromemadnd-blog-static.905509028.workers.dev](https://cromemadnd-blog-static.905509028.workers.dev)。
 
-旧 SSR 入口 `apps/worker/`、`publisher:*` 命令及 `deploy/compose.yaml` 保留用于迁移回退。新入口不会调用它们，也不会将仓库源码作为静态资产上传。迁移期间不要同时对同一个 Worker 运行多套发布器。
+仓库只保留原生 Quartz SSG 和 Static Assets 发布链路。旧 SSR、D1/R2 发布器、数据库迁移及其配置已移除，需要查看旧实现时请使用 Git 历史。此次清理不会删除已存在的 Cloudflare Worker、数据库或桶。上传范围仅为构建输出快照，不包含仓库源码。
 
 ## 本地构建与验证
 
@@ -37,7 +37,7 @@ pnpm static:deploy --dry-run
 pnpm static:preview
 ```
 
-`static:prepare` 使用现有的锁定插件准备脚本：本地 fork 建立链接，远端插件按 `quartz.lock.json` 的 commit 获取；不会覆盖不匹配的已有插件缓存。修改本地插件源码后，先运行例如 `node plugins/build.mjs explorer` 更新其 dist，确认类型声明仍保留，再重启发布器。
+`static:prepare` 使用锁定插件准备脚本 `scripts/prepare-plugins.mjs`：本地 fork 建立链接，远端插件按 `quartz.lock.json` 的 commit 获取；不会覆盖不匹配的已有插件缓存。修改本地插件源码后，先运行例如 `node plugins/build.mjs explorer` 更新其 dist，确认类型声明仍保留，再重启发布器。
 
 `static:build` 默认读取 `content/`，不访问 Cloudflare；产物与缓存写入 `.static-publisher/`。`snapshot` 是指向最新完整输出的符号链接。`static:preview` 用真实本地 workerd 提供该目录，不需要 Cloudflare 凭据。不要把 `snapshot/` 当作 Quartz 的可变构建目录。
 
@@ -104,7 +104,7 @@ pnpm static:watch --no-deploy
 
 ## 使用 Compose 接入 LiveSync
 
-新 Compose 使用独立项目名 `quartz-static-publisher`，不会复用旧 SSR Compose 的卷。切换时不要删除旧卷；新 Bridge 先完成自己的首次同步。
+Compose 使用项目名 `quartz-static-publisher`。如果曾运行旧发布服务，迁移时停止旧发布进程并保留其数据卷；本方案的 Bridge 先完成自己的首次同步。
 
 ```bash
 cp deploy/livesync/config.example.json deploy/livesync/config.json
@@ -193,7 +193,7 @@ pnpm exec wrangler versions list --config apps/static/wrangler.jsonc
 pnpm exec wrangler rollback 目标版本ID --config apps/static/wrangler.jsonc
 ```
 
-回滚前停止 watcher，避免下一批更新再次发布源镜像的最新内容。域名迁移回退则将映射恢复到旧 Worker；保留旧入口与存储直到确认新版本稳定。
+回滚前停止 watcher，避免下一批更新再次发布源镜像的最新内容。域名迁移需要回退时，可将映射恢复到尚未删除的旧线上 Worker。旧源码不再作为日常入口保留，需要恢复时从 Git 历史建立独立工作目录，避免混入当前发布链路。
 
 ## 日志、磁盘与验证范围
 
@@ -201,6 +201,6 @@ Publisher 输出 JSON 事件：`watching`、`built`、`build-failed`、`publishe
 
 正常构建会清理不再使用的输出快照，保留最新、待发布及已发布的快照，上传进行中暂缓清理。SQLite 解析缓存和 OG 缓存不会自动按历史版本淘汰，应监控磁盘。需要清理时先停 Publisher，可删除 `parse.sqlite`、`og-cache/`、`component-resources/` 后重新构建；不要删除源镜像或正在上传的输出。进程强制终止留下的 `inputs/` 和 `quartz/.quartz-cache/static-*` 可以在停机后清理。
 
-本次验证包括：真实 Quartz 插件的缓存复用、嵌入更新、别名移除、草稿/隐藏文章、删除/重命名、进程重启、监听重试、部署队列合并与串行、快照完整性、文件大小和配置注入防护；原 SSR 集成测试保持通过。本地 workerd 验证了 HTML、JSON、图片、404 和 ETag 304；独立 workers.dev 也验证了页面、JSON、图片及 404。线上临时文件测试确认：首次新增和同名修改各只上传 1 个资产，修改后带旧 ETag 的请求得到新内容，删除后返回 404，全程未清缓存；测试文件已移除并恢复原博客快照。再次发布相同快照时，Wrangler 确认无需上传资产。一次单文件更新实测 Worker 上传阶段 3.89 秒、触发器部署 0.76 秒（文件上传包含在前者中），不包含 LiveSync 和合并等待，不代表固定时延承诺。当前博客 20 个 Markdown 中有 18 篇可发布文章，生成 112 个文件；缓存命中时一次本地构建实测约 396 ms，不包含进程打包、LiveSync 和远端部署耗时。
+本次验证包括：真实 Quartz 插件的缓存复用、嵌入更新、别名移除、草稿/隐藏文章、删除/重命名、进程重启、监听重试、部署队列合并与串行、快照完整性、文件大小和配置注入防护；同时验证 Quartz 的路径、转引、页面资源及搜索等原生回归测试。本地 workerd 验证了 HTML、JSON、图片、404 和 ETag 304；独立 workers.dev 也验证了页面、JSON、图片及 404。线上临时文件测试确认：首次新增和同名修改各只上传 1 个资产，修改后带旧 ETag 的请求得到新内容，删除后返回 404，全程未清缓存；测试文件已移除并恢复原博客快照。再次发布相同快照时，Wrangler 确认无需上传资产。一次单文件更新实测 Worker 上传阶段 3.89 秒、触发器部署 0.76 秒（文件上传包含在前者中），不包含 LiveSync 和合并等待，不代表固定时延承诺。当前博客 20 个 Markdown 中有 18 篇可发布文章，生成 112 个文件；缓存命中时一次本地构建实测约 396 ms，不包含进程打包、LiveSync 和远端部署耗时。
 
 Docker Hub 在当前环境连接超时，正式 Dockerfile 的全新基础镜像构建尚未完成；已另用本机已有 Node 24 发布器镜像验证新代码的容器运行。真实 CouchDB 的同步兼容性、服务器长期运行与端到端更新时间，仍需在服务器上接入实际配置验证。

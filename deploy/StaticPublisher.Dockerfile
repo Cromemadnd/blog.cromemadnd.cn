@@ -7,7 +7,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY quartz.config.yaml quartz.lock.json ./
 COPY plugins ./plugins
-COPY scripts/prepare-cloud.mjs ./scripts/prepare-cloud.mjs
+COPY scripts/prepare-plugins.mjs ./scripts/prepare-plugins.mjs
 RUN pnpm static:prepare
 COPY . .
 
