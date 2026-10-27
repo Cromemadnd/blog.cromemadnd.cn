@@ -37,7 +37,8 @@
     "static:watch": "node --env-file-if-exists=.env.static scripts/static-publisher.mjs watch",
     "static:deploy": "node --env-file-if-exists=.env.static scripts/static-publisher.mjs deploy",
     "static:preview": "wrangler dev --config apps/static/wrangler.jsonc",
-    "static:test": "node --test scripts/static-publisher/*.test.mjs"
+    "static:test": "node --test scripts/static-publisher/*.test.mjs",
+    "static:check": "tsc --noEmit -p tsconfig.static.json"
   },
   "engines": {
     "npm": ">=10.9.2",

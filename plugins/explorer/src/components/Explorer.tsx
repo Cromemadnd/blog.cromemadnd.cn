@@ -3,6 +3,7 @@ import type {
   QuartzComponentConstructor,
   QuartzComponentProps,
 } from "@quartz-community/types";
+import { useId } from "preact/hooks";
 import OverflowListFactory from "./OverflowList";
 import { classNames } from "../util/lang";
 import { i18n } from "../i18n";
@@ -54,8 +55,6 @@ const defaultOptions: ExplorerOptions = {
   order: ["filter", "map", "sort"],
 };
 
-let numExplorers = 0;
-
 function concatenateResources(...resources: (string | undefined)[]): string {
   return resources.filter((r): r is string => !!r).join("\n");
 }
@@ -67,7 +66,7 @@ export default ((userOpts?: Partial<ExplorerOptions>) => {
   const ExplorerComponent: QuartzComponent = (props: QuartzComponentProps) => {
     const { cfg } = props;
     const displayClass = (props as { displayClass?: "mobile-only" | "desktop-only" }).displayClass;
-    const id = `explorer-${numExplorers++}`;
+    const id = `explorer-${useId()}`;
 
     return (
       <div
